@@ -136,3 +136,4 @@ C:\Users\HP\Downloads\Shop_Management_System\ShopManagementAPI\obj\Debug\net8.0\
 C:\Users\HP\Downloads\Shop_Management_System\ShopManagementAPI\obj\Debug\net8.0\ShopManagementAPI.pdb
 C:\Users\HP\Downloads\Shop_Management_System\ShopManagementAPI\obj\Debug\net8.0\ShopManagementAPI.genruntimeconfig.cache
 C:\Users\HP\Downloads\Shop_Management_System\ShopManagementAPI\obj\Debug\net8.0\ref\ShopManagementAPI.dll
+C:\Users\HP\Downloads\Shop_Management_System\ShopManagementAPI\obj\Debug\net8.0\ShopManagementAPI.sourcelink.json

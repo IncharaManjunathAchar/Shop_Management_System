@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HP\\Downloads\\Shop_Management_System\\ShopManagementAPI\\ShopManagementAPI.csproj": {}
+    "C:\\Users\\susa\\Desktop\\shop\\Shop_Management_System\\ShopManagementAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HP\\Downloads\\Shop_Management_System\\ShopManagementAPI\\ShopManagementAPI.csproj": {
+    "C:\\Users\\susa\\Desktop\\shop\\Shop_Management_System\\ShopManagementAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Downloads\\Shop_Management_System\\ShopManagementAPI\\ShopManagementAPI.csproj",
+        "projectUniqueName": "C:\\Users\\susa\\Desktop\\shop\\Shop_Management_System\\ShopManagementAPI.csproj",
         "projectName": "ShopManagementAPI",
-        "projectPath": "C:\\Users\\HP\\Downloads\\Shop_Management_System\\ShopManagementAPI\\ShopManagementAPI.csproj",
-        "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Downloads\\Shop_Management_System\\ShopManagementAPI\\obj\\",
+        "projectPath": "C:\\Users\\susa\\Desktop\\shop\\Shop_Management_System\\ShopManagementAPI.csproj",
+        "packagesPath": "C:\\Users\\susa\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\susa\\Desktop\\shop\\Shop_Management_System\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\susa\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -76,24 +76,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.24, 8.0.24]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -102,7 +84,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

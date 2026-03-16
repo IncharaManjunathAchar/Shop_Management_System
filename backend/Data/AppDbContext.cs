@@ -1,33 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using ShopManagementAPI.Models;
 
-namespace ShopManagementAPI.Data;
-
-public class AppDbContext : DbContext
+namespace ShopManagementAPI.Data
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
-
-    public DbSet<Shop> Shops { get; set; }
-    public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
-    public DbSet<UserSubscription> UserSubscriptions { get; set; }
-    public DbSet<Item> Items { get; set; }
-    public DbSet<Transaction> Transactions { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class AppDbContext : DbContext
     {
-        modelBuilder.Entity<Item>(e =>
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            e.Property(i => i.CostPrice).HasPrecision(18, 2);
-            e.Property(i => i.SellingPrice).HasPrecision(18, 2);
-        });
+        }
 
-        modelBuilder.Entity<SubscriptionPlan>()
-            .Property(s => s.Price).HasPrecision(18, 2);
+        public DbSet<Shop> Shops { get; set; }
+        public DbSet<Item> Items { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+        public DbSet<UserSubscription> UserSubscriptions { get; set; }
+        public DbSet<ProfitLossSummary> ProfitLossSummaries { get; set; }
 
-        modelBuilder.Entity<Transaction>(e =>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            e.Property(t => t.UnitPrice).HasPrecision(18, 2);
-            e.Property(t => t.TotalAmount).HasPrecision(18, 2);
-        });
+            modelBuilder.Entity<ProfitLossSummary>().HasNoKey();
+        }
     }
 }

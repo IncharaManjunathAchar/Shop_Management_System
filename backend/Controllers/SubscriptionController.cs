@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization; // 🔥 ADD THIS
 using ShopManagementAPI.Data;
 using ShopManagementAPI.Models;
 
 namespace ShopManagementAPI.Controllers;
 
+[Authorize] // 🔐 ADD THIS
 [ApiController]
 [Route("api/subscriptions")]
 public class SubscriptionController : ControllerBase
@@ -18,7 +20,11 @@ public class SubscriptionController : ControllerBase
     // ---- Subscription Plans ----
 
     [HttpGet("plans")]
-    public IActionResult GetPlans() => Ok(_context.SubscriptionPlans.ToList());
+    public IActionResult GetPlans()
+    {
+        var plans = _context.SubscriptionPlans.ToList();
+        return Ok(plans);
+    }
 
     [HttpPost("plans")]
     public IActionResult CreatePlan(SubscriptionPlan plan)
@@ -32,7 +38,8 @@ public class SubscriptionController : ControllerBase
     public IActionResult UpdatePlan(int id, SubscriptionPlan updatedPlan)
     {
         var plan = _context.SubscriptionPlans.Find(id);
-        if (plan == null) return NotFound();
+        if (plan == null)
+            return NotFound("Plan not found");
 
         plan.PlanName = updatedPlan.PlanName;
         plan.DurationDays = updatedPlan.DurationDays;
@@ -48,23 +55,31 @@ public class SubscriptionController : ControllerBase
     public IActionResult DeletePlan(int id)
     {
         var plan = _context.SubscriptionPlans.Find(id);
-        if (plan == null) return NotFound();
+        if (plan == null)
+            return NotFound("Plan not found");
 
         _context.SubscriptionPlans.Remove(plan);
         _context.SaveChanges();
-        return Ok("Plan deleted successfully.");
+        return Ok("Plan deleted successfully");
     }
 
     // ---- User Subscriptions ----
 
     [HttpGet("users")]
-    public IActionResult GetAllUserSubscriptions() => Ok(_context.UserSubscriptions.ToList());
+    public IActionResult GetAllUserSubscriptions()
+    {
+        var users = _context.UserSubscriptions.ToList();
+        return Ok(users);
+    }
 
     [HttpGet("users/{id}")]
     public IActionResult GetUserSubscription(int id)
     {
         var subscription = _context.UserSubscriptions.Find(id);
-        return subscription == null ? NotFound() : Ok(subscription);
+        if (subscription == null)
+            return NotFound("Subscription not found");
+
+        return Ok(subscription);
     }
 
     [HttpGet("users/{userId}/active")]
@@ -75,20 +90,24 @@ public class SubscriptionController : ControllerBase
             .OrderByDescending(s => s.ExpiryDate)
             .FirstOrDefault();
 
-        return subscription == null ? NotFound("No active subscription found.") : Ok(subscription);
+        if (subscription == null)
+            return NotFound("No active subscription found");
+
+        return Ok(subscription);
     }
 
     [HttpPost("users/{userId}/subscribe/{planId}")]
     public IActionResult Subscribe(string userId, int planId)
     {
         var plan = _context.SubscriptionPlans.Find(planId);
-        if (plan == null) return NotFound("Plan not found.");
+        if (plan == null)
+            return NotFound("Plan not found");
 
         var hasActive = _context.UserSubscriptions
             .Any(s => s.UserId == userId && s.ExpiryDate >= DateTime.Now);
 
         if (hasActive)
-            return BadRequest("User already has an active subscription.");
+            return BadRequest("User already has an active subscription");
 
         var subscription = new UserSubscription
         {
@@ -102,6 +121,7 @@ public class SubscriptionController : ControllerBase
 
         _context.UserSubscriptions.Add(subscription);
         _context.SaveChanges();
+
         return Ok(subscription);
     }
 
@@ -109,10 +129,12 @@ public class SubscriptionController : ControllerBase
     public IActionResult DeleteUserSubscription(int id)
     {
         var subscription = _context.UserSubscriptions.Find(id);
-        if (subscription == null) return NotFound();
+        if (subscription == null)
+            return NotFound("Subscription not found");
 
         _context.UserSubscriptions.Remove(subscription);
         _context.SaveChanges();
-        return Ok("Subscription deleted successfully.");
+
+        return Ok("Subscription deleted successfully");
     }
 }

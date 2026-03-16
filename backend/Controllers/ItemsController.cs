@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization; // 🔥 ADD THIS
 using ShopManagementAPI.Data;
 using ShopManagementAPI.Models;
 
 namespace ShopManagementAPI.Controllers;
 
+[Authorize] // 🔐 ADD THIS
 [ApiController]
 [Route("api/items")]
 public class ItemsController : ControllerBase
@@ -16,14 +18,20 @@ public class ItemsController : ControllerBase
     }
 
     [HttpGet("shop/{shopId}")]
-    public IActionResult GetByShop(int shopId) =>
-        Ok(_context.Items.Where(i => i.ShopId == shopId).ToList());
+    public IActionResult GetByShop(int shopId)
+    {
+        var items = _context.Items.Where(i => i.ShopId == shopId).ToList();
+        return Ok(items);
+    }
 
     [HttpGet("{id}")]
     public IActionResult GetById(int id)
     {
         var item = _context.Items.FirstOrDefault(i => i.ItemId == id);
-        return item == null ? NotFound() : Ok(item);
+        if (item == null)
+            return NotFound("Item not found");
+
+        return Ok(item);
     }
 
     [HttpPost]
@@ -38,7 +46,8 @@ public class ItemsController : ControllerBase
     public IActionResult Update(int id, Item updatedItem)
     {
         var item = _context.Items.FirstOrDefault(i => i.ItemId == id);
-        if (item == null) return NotFound();
+        if (item == null)
+            return NotFound("Item not found");
 
         item.ItemName = updatedItem.ItemName;
         item.Quantity = updatedItem.Quantity;
@@ -54,20 +63,25 @@ public class ItemsController : ControllerBase
     public IActionResult Delete(int id)
     {
         var item = _context.Items.FirstOrDefault(i => i.ItemId == id);
-        if (item == null) return NotFound();
+        if (item == null)
+            return NotFound("Item not found");
 
         _context.Items.Remove(item);
         _context.SaveChanges();
-        return Ok("Item deleted successfully.");
+        return Ok("Item deleted successfully");
     }
 
     [HttpGet("shop/{shopId}/expiring")]
     public IActionResult GetExpiring(int shopId, [FromQuery] int days = 30)
     {
         var threshold = DateTime.Now.AddDays(days);
+
         var items = _context.Items
-            .Where(i => i.ShopId == shopId && i.ExpiryDate <= threshold && i.ExpiryDate >= DateTime.Now)
+            .Where(i => i.ShopId == shopId &&
+                        i.ExpiryDate <= threshold &&
+                        i.ExpiryDate >= DateTime.Now)
             .ToList();
+
         return Ok(items);
     }
 }

@@ -4,7 +4,7 @@ public class Shop
 {
     public int ShopId { get; set; }
 
-    public int UserId { get; set; }
+    public required string UserId { get; set; }
 
     public required string ShopName { get; set; }
 

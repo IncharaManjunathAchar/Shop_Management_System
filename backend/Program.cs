@@ -3,23 +3,24 @@ using ShopManagementAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
-
-// Configure DB Context
+// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Controllers
+// CORS — allow Angular dev server
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddControllers();
-
-// Enable Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline
 
 if (app.Environment.IsDevelopment())
 {
@@ -29,10 +30,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Authorization middleware (optional but recommended)
+app.UseCors("AllowAngular");
+
+// Authentication must come before Authorization
+// app.UseAuthentication(); // Uncomment when JWT is added
 app.UseAuthorization();
 
-// Map controller routes
 app.MapControllers();
 
 app.Run();

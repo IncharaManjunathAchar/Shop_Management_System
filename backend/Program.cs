@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ShopManagementAPI.Data;
+using ShopManagementAPI.Middleware;
+using ShopManagementAPI.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,9 +43,21 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddHostedService<SubscriptionReminderService>();
+
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Identity
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+})
+.AddEntityFrameworkStores<AppDbContext>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -79,6 +94,23 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Seed Admin role and user
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+    if (await userManager.FindByNameAsync("admin") == null)
+    {
+        var admin = new IdentityUser { UserName = "admin", Email = "admin@shop.com" };
+        await userManager.CreateAsync(admin, "Admin@1234");
+        await userManager.AddToRoleAsync(admin, "Admin");
+    }
+}
+
 // Middleware
 if (app.Environment.IsDevelopment())
 {
@@ -88,10 +120,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseCors("AllowAngular");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<SubscriptionMiddleware>();
 
 app.MapControllers();
 

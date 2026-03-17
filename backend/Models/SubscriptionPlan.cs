@@ -16,4 +16,6 @@ public class SubscriptionPlan
     public int TrialDays { get; set; }
 
     public required string Description { get; set; }
+
+    public int MaxShops { get; set; }
 }

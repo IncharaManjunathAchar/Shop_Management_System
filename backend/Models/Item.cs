@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ShopManagementAPI.Models;
 
 public class Item
@@ -5,6 +7,9 @@ public class Item
     public int ItemId { get; set; }
 
     public int ShopId { get; set; }
+
+    [ForeignKey("ShopId")]
+    public Shop? Shop { get; set; }
 
     public required string ItemName { get; set; }
 

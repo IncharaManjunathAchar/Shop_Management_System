@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization; // 🔥 ADD THIS
+using Microsoft.AspNetCore.Authorization;
 using ShopManagementAPI.Data;
 using ShopManagementAPI.Models;
+using System.Security.Claims;
 
 namespace ShopManagementAPI.Controllers;
 
-[Authorize] // 🔐 ADD THIS
+[Authorize(Roles = "Shopkeeper")]
 [ApiController]
 [Route("api/transactions")]
 public class TransactionsController : ControllerBase
@@ -17,10 +18,18 @@ public class TransactionsController : ControllerBase
         _context = context;
     }
 
+    private bool OwnsShop(int shopId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return _context.Shops.Any(s => s.ShopId == shopId && s.UserId == userId);
+    }
+
     [HttpGet]
     public IActionResult GetAll()
     {
-        var transactions = _context.Transactions.ToList();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userShopIds = _context.Shops.Where(s => s.UserId == userId).Select(s => s.ShopId).ToList();
+        var transactions = _context.Transactions.Where(t => userShopIds.Contains(t.ShopId)).ToList();
         return Ok(transactions);
     }
 
@@ -28,36 +37,33 @@ public class TransactionsController : ControllerBase
     public IActionResult GetById(int id)
     {
         var transaction = _context.Transactions.Find(id);
-        if (transaction == null)
-            return NotFound("Transaction not found");
-
+        if (transaction == null) return NotFound("Transaction not found");
+        if (!OwnsShop(transaction.ShopId)) return Forbid();
         return Ok(transaction);
     }
 
     [HttpGet("shop/{shopId}")]
     public IActionResult GetByShop(int shopId)
     {
-        var transactions = _context.Transactions
-            .Where(t => t.ShopId == shopId)
-            .ToList();
-
+        if (!OwnsShop(shopId)) return Forbid();
+        var transactions = _context.Transactions.Where(t => t.ShopId == shopId).ToList();
         return Ok(transactions);
     }
 
     [HttpPost]
     public IActionResult Create(Transaction transaction)
     {
+        if (!OwnsShop(transaction.ShopId)) return Forbid();
+
         var item = _context.Items
             .FirstOrDefault(i => i.ItemId == transaction.ItemId && i.ShopId == transaction.ShopId);
 
-        if (item == null)
-            return NotFound("Item not found in this shop");
+        if (item == null) return NotFound("Item not found in this shop");
 
         if (transaction.TransactionType == "Sale")
         {
             if (item.Quantity < transaction.Quantity)
                 return BadRequest("Insufficient stock");
-
             item.Quantity -= transaction.Quantity;
         }
         else if (transaction.TransactionType == "Purchase")
@@ -74,7 +80,6 @@ public class TransactionsController : ControllerBase
 
         _context.Transactions.Add(transaction);
         _context.SaveChanges();
-
         return Ok(transaction);
     }
 }

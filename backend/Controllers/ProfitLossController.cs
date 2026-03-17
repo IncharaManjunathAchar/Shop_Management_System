@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization; // 🔥 ADD THIS
+using Microsoft.AspNetCore.Authorization;
 using ShopManagementAPI.Data;
 using ShopManagementAPI.Models;
+using System.Security.Claims;
 
 namespace ShopManagementAPI.Controllers;
 
-[Authorize] // 🔐 ADD THIS
+[Authorize(Roles = "Shopkeeper")]
 [ApiController]
 [Route("api/profitloss")]
 public class ProfitLossController : ControllerBase
@@ -17,59 +18,44 @@ public class ProfitLossController : ControllerBase
         _context = context;
     }
 
-    // GET api/profitloss/{shopId}
+    private bool OwnsShop(int shopId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return _context.Shops.Any(s => s.ShopId == shopId && s.UserId == userId);
+    }
+
     [HttpGet("{shopId}")]
     public IActionResult GetSummary(int shopId)
     {
-        var transactions = _context.Transactions
-            .Where(t => t.ShopId == shopId)
-            .ToList();
-
-        if (!transactions.Any())
-            return NotFound("No transactions found for this shop");
-
-        var summary = BuildSummary(
-            shopId,
-            transactions,
-            transactions.Min(t => t.TransactionDate),
-            transactions.Max(t => t.TransactionDate)
-        );
-
+        if (!OwnsShop(shopId)) return Forbid();
+        var transactions = _context.Transactions.Where(t => t.ShopId == shopId).ToList();
+        if (!transactions.Any()) return NotFound("No transactions found for this shop");
+        var summary = BuildSummary(shopId, transactions, transactions.Min(t => t.TransactionDate), transactions.Max(t => t.TransactionDate));
         return Ok(summary);
     }
 
-    // GET api/profitloss/{shopId}/filter?from=2024-01-01&to=2024-12-31
     [HttpGet("{shopId}/filter")]
     public IActionResult GetSummaryByDateRange(int shopId, [FromQuery] DateTime from, [FromQuery] DateTime to)
     {
+        if (!OwnsShop(shopId)) return Forbid();
         var transactions = _context.Transactions
-            .Where(t => t.ShopId == shopId &&
-                        t.TransactionDate >= from &&
-                        t.TransactionDate <= to)
+            .Where(t => t.ShopId == shopId && t.TransactionDate >= from && t.TransactionDate <= to)
             .ToList();
-
-        if (!transactions.Any())
-            return NotFound("No transactions found for the given date range");
-
-        var summary = BuildSummary(shopId, transactions, from, to);
-        return Ok(summary);
+        if (!transactions.Any()) return NotFound("No transactions found for the given date range");
+        return Ok(BuildSummary(shopId, transactions, from, to));
     }
 
-    // GET api/profitloss/all
     [HttpGet("all")]
     public IActionResult GetAllShopsSummary()
     {
-        var transactions = _context.Transactions.ToList();
-
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var transactions = _context.Transactions
+            .Where(t => _context.Shops.Any(s => s.ShopId == t.ShopId && s.UserId == userId))
+            .ToList();
         var result = transactions
             .GroupBy(t => t.ShopId)
-            .Select(g => BuildSummary(
-                g.Key,
-                g.ToList(),
-                g.Min(t => t.TransactionDate),
-                g.Max(t => t.TransactionDate)))
+            .Select(g => BuildSummary(g.Key, g.ToList(), g.Min(t => t.TransactionDate), g.Max(t => t.TransactionDate)))
             .ToList();
-
         return Ok(result);
     }
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShopManagementAPI.Data;
 
@@ -11,9 +12,11 @@ using ShopManagementAPI.Data;
 namespace ShopManagementAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260317050300_AddIdentity")]
+    partial class AddIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,8 +257,6 @@ namespace ShopManagementAPI.Migrations
 
                     b.HasKey("ItemId");
 
-                    b.HasIndex("ShopId");
-
                     b.ToTable("Items");
                 });
 
@@ -274,9 +275,6 @@ namespace ShopManagementAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("LogoUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ShopAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -287,11 +285,9 @@ namespace ShopManagementAPI.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ShopId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Shops");
                 });
@@ -309,9 +305,6 @@ namespace ShopManagementAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DurationDays")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MaxShops")
                         .HasColumnType("int");
 
                     b.Property<string>("PlanName")
@@ -335,7 +328,6 @@ namespace ShopManagementAPI.Migrations
                             PlanId = 1,
                             Description = "Try all features free for 14 days",
                             DurationDays = 14,
-                            MaxShops = 1,
                             PlanName = "Free Trial",
                             Price = 0m,
                             TrialDays = 14
@@ -345,7 +337,6 @@ namespace ShopManagementAPI.Migrations
                             PlanId = 2,
                             Description = "Full access, billed monthly",
                             DurationDays = 30,
-                            MaxShops = 5,
                             PlanName = "Monthly",
                             Price = 99m,
                             TrialDays = 0
@@ -355,7 +346,6 @@ namespace ShopManagementAPI.Migrations
                             PlanId = 3,
                             Description = "Full access, billed yearly",
                             DurationDays = 365,
-                            MaxShops = 7,
                             PlanName = "Yearly",
                             Price = 999m,
                             TrialDays = 0
@@ -399,10 +389,6 @@ namespace ShopManagementAPI.Migrations
 
                     b.HasKey("TransactionId");
 
-                    b.HasIndex("ItemId");
-
-                    b.HasIndex("ShopId");
-
                     b.ToTable("Transactions");
                 });
 
@@ -433,13 +419,9 @@ namespace ShopManagementAPI.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SubscriptionId");
-
-                    b.HasIndex("PlanId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserSubscriptions");
                 });
@@ -493,66 +475,6 @@ namespace ShopManagementAPI.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ShopManagementAPI.Models.Item", b =>
-                {
-                    b.HasOne("ShopManagementAPI.Models.Shop", "Shop")
-                        .WithMany()
-                        .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Shop");
-                });
-
-            modelBuilder.Entity("ShopManagementAPI.Models.Shop", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ShopManagementAPI.Models.Transaction", b =>
-                {
-                    b.HasOne("ShopManagementAPI.Models.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ShopManagementAPI.Models.Shop", "Shop")
-                        .WithMany()
-                        .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("Shop");
-                });
-
-            modelBuilder.Entity("ShopManagementAPI.Models.UserSubscription", b =>
-                {
-                    b.HasOne("ShopManagementAPI.Models.SubscriptionPlan", "Plan")
-                        .WithMany()
-                        .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Plan");
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

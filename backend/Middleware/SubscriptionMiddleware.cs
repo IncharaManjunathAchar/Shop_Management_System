@@ -22,7 +22,7 @@ public class SubscriptionMiddleware
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var hasActive = db.UserSubscriptions
-                .Any(s => s.UserId == userId && s.ExpiryDate >= DateTime.Now);
+                .Any(s => s.UserId == userId && s.Status == "Approved" && s.ExpiryDate >= DateTime.Now);
 
             if (!hasActive)
             {

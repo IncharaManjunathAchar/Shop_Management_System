@@ -16,16 +16,21 @@ public class EmailService
     public async Task SendAsync(string toEmail, string toName, string subject, string body)
     {
         var emailConfig = _config.GetSection("Email");
+        var username = emailConfig["Username"];
+        var password = emailConfig["Password"];
+
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            return;
 
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress(emailConfig["FromName"], emailConfig["Username"]));
+        message.From.Add(new MailboxAddress(emailConfig["FromName"], username));
         message.To.Add(new MailboxAddress(toName, toEmail));
         message.Subject = subject;
         message.Body = new TextPart("plain") { Text = body };
 
         using var client = new SmtpClient();
         await client.ConnectAsync(emailConfig["Host"], int.Parse(emailConfig["Port"]!), SecureSocketOptions.StartTls);
-        await client.AuthenticateAsync(emailConfig["Username"], emailConfig["Password"]);
+        await client.AuthenticateAsync(username, password);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
     }

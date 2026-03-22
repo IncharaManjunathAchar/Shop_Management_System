@@ -24,4 +24,6 @@ public class UserSubscription
     public required string SubscriptionType { get; set; }
 
     public required string PaymentStatus { get; set; }
+
+    public string Status { get; set; } = "Pending";
 }

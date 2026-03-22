@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ShopManagementAPI.Data;
 
 namespace ShopManagementAPI.Controllers;
@@ -10,23 +12,72 @@ namespace ShopManagementAPI.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public AdminController(AppDbContext context)
+    public AdminController(AppDbContext context, UserManager<IdentityUser> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
     [HttpGet("dashboard")]
-    public IActionResult GetDashboardStats()
+    public async Task<IActionResult> GetDashboardStats()
     {
         var totalShops = _context.Shops.Count();
         var activeSubscriptions = _context.UserSubscriptions
-            .Count(s => s.ExpiryDate >= DateTime.Now);
+            .Count(s => s.Status == "Approved" && s.ExpiryDate >= DateTime.Now);
+        var totalUsers = (await _userManager.GetUsersInRoleAsync("Shopkeeper")).Count;
 
         return Ok(new
         {
             TotalShops = totalShops,
-            ActiveSubscriptions = activeSubscriptions
+            ActiveSubscriptions = activeSubscriptions,
+            TotalUsers = totalUsers
         });
+    }
+
+    [HttpGet("shops")]
+    public async Task<IActionResult> GetShopsWithOwners()
+    {
+        var shops = await _context.Shops
+            .Include(s => s.User)
+            .Select(s => new
+            {
+                s.ShopId,
+                s.ShopName,
+                s.ShopAddress,
+                s.ContactNumber,
+                s.LogoUrl,
+                s.CreatedAt,
+                Owner = new
+                {
+                    s.UserId,
+                    Username = s.User != null ? s.User.UserName : null,
+                    Email = s.User != null ? s.User.Email : null
+                }
+            })
+            .ToListAsync();
+
+        return Ok(shops);
+    }
+
+    [HttpGet("users")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var shopkeepers = await _userManager.GetUsersInRoleAsync("Shopkeeper");
+
+        var result = shopkeepers.Select(u => new
+        {
+            u.Id,
+            u.UserName,
+            u.Email,
+            Subscription = _context.UserSubscriptions
+                .Where(s => s.UserId == u.Id)
+                .OrderByDescending(s => s.SubscriptionId)
+                .Select(s => new { s.Status, s.ExpiryDate, PlanName = s.Plan != null ? s.Plan.PlanName : null })
+                .FirstOrDefault()
+        });
+
+        return Ok(result);
     }
 }

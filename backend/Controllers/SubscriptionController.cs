@@ -119,15 +119,25 @@ public class SubscriptionController : ControllerBase
     [HttpPost("users/{userId}/subscribe/{planId}")]
     public async Task<IActionResult> Subscribe(string userId, int planId)
     {
+        var requestingUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!User.IsInRole("Admin") && userId != requestingUserId)
+            return Forbid();
+
         var plan = _context.SubscriptionPlans.Find(planId);
         if (plan == null)
             return NotFound("Plan not found");
 
         var hasActive = _context.UserSubscriptions
-            .Any(s => s.UserId == userId && s.ExpiryDate >= DateTime.Now);
+            .Any(s => s.UserId == userId && s.Status == "Approved" && s.ExpiryDate >= DateTime.Now);
 
         if (hasActive)
             return BadRequest("User already has an active subscription");
+
+        var hasPending = _context.UserSubscriptions
+            .Any(s => s.UserId == userId && s.Status == "Pending");
+
+        if (hasPending)
+            return BadRequest("User already has a pending subscription request");
 
         var subscription = new UserSubscription
         {
@@ -136,27 +146,106 @@ public class SubscriptionController : ControllerBase
             StartDate = DateTime.Now,
             ExpiryDate = DateTime.Now.AddDays(plan.DurationDays),
             SubscriptionType = plan.TrialDays > 0 ? "Trial" : "Paid",
-            PaymentStatus = plan.Price == 0 ? "Free" : "Paid"
+            PaymentStatus = plan.Price == 0 ? "Free" : "Paid",
+            Status = "Pending"
         };
 
         _context.UserSubscriptions.Add(subscription);
         await _context.SaveChangesAsync();
 
-        var user = await _userManager.FindByIdAsync(userId);
+        return Ok(new { message = "Subscription request submitted. Awaiting admin approval.", subscription });
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("pending")]
+    public IActionResult GetPendingSubscriptions()
+    {
+        var pending = _context.UserSubscriptions
+            .Where(s => s.Status == "Pending")
+            .Select(s => new
+            {
+                s.SubscriptionId,
+                s.UserId,
+                Username = s.User != null ? s.User.UserName : null,
+                s.PlanId,
+                PlanName = s.Plan != null ? s.Plan.PlanName : null,
+                s.StartDate,
+                s.ExpiryDate,
+                s.SubscriptionType,
+                s.PaymentStatus,
+                s.Status
+            })
+            .ToList();
+
+        return Ok(pending);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/approve")]
+    public async Task<IActionResult> ApproveSubscription(int id)
+    {
+        var subscription = _context.UserSubscriptions.Find(id);
+        if (subscription == null)
+            return NotFound("Subscription not found");
+
+        if (subscription.Status != "Pending")
+            return BadRequest($"Subscription is already {subscription.Status}");
+
+        subscription.Status = "Approved";
+        subscription.StartDate = DateTime.Now;
+        subscription.ExpiryDate = DateTime.Now.AddDays(
+            (_context.SubscriptionPlans.Find(subscription.PlanId))?.DurationDays ?? 30);
+
+        await _context.SaveChangesAsync();
+
+        var user = await _userManager.FindByIdAsync(subscription.UserId);
         if (user?.Email != null)
         {
-            await _emailService.SendAsync(
-                user.Email,
-                user.UserName!,
-                "Subscription Confirmed",
-                $"Dear {user.UserName},\n\nYou have successfully subscribed to the '{plan.PlanName}' plan.\n" +
-                $"Start Date: {subscription.StartDate:dd MMM yyyy}\n" +
-                $"Expiry Date: {subscription.ExpiryDate:dd MMM yyyy}\n\n" +
-                $"Shop Management System"
-            );
+            try
+            {
+                var plan = _context.SubscriptionPlans.Find(subscription.PlanId);
+                await _emailService.SendAsync(
+                    user.Email, user.UserName!,
+                    "Subscription Approved",
+                    $"Dear {user.UserName},\n\nYour subscription to '{plan?.PlanName}' has been approved.\n" +
+                    $"Expiry Date: {subscription.ExpiryDate:dd MMM yyyy}\n\nShop Management System"
+                );
+            }
+            catch { }
         }
 
-        return Ok(subscription);
+        return Ok(new { message = "Subscription approved.", subscription });
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/reject")]
+    public async Task<IActionResult> RejectSubscription(int id)
+    {
+        var subscription = _context.UserSubscriptions.Find(id);
+        if (subscription == null)
+            return NotFound("Subscription not found");
+
+        if (subscription.Status != "Pending")
+            return BadRequest($"Subscription is already {subscription.Status}");
+
+        subscription.Status = "Rejected";
+        await _context.SaveChangesAsync();
+
+        var user = await _userManager.FindByIdAsync(subscription.UserId);
+        if (user?.Email != null)
+        {
+            try
+            {
+                await _emailService.SendAsync(
+                    user.Email, user.UserName!,
+                    "Subscription Rejected",
+                    $"Dear {user.UserName},\n\nYour subscription request has been rejected.\nPlease contact support.\n\nShop Management System"
+                );
+            }
+            catch { }
+        }
+
+        return Ok(new { message = "Subscription rejected.", subscription });
     }
 
     [Authorize(Roles = "Admin")]

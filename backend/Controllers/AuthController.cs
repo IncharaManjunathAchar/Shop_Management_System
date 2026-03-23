@@ -28,6 +28,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [Consumes("application/json")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Register([FromBody] RegisterDto request)
     {
         var existing = await _userManager.FindByNameAsync(request.Username);
@@ -51,12 +53,16 @@ public class AuthController : ControllerBase
         _context.Shops.Add(shop);
         await _context.SaveChangesAsync();
 
-        await _emailService.SendAsync(
-            user.Email!,
-            user.UserName!,
-            "Welcome to Shop Management System",
-            $"Dear {user.UserName},\n\nYou have successfully registered.\nYour shop '{shop.ShopName}' has been created.\n\nPlease subscribe to a plan to start using the system.\n\nShop Management System"
-        );
+        try
+        {
+            await _emailService.SendAsync(
+                user.Email!,
+                user.UserName!,
+                "Welcome to Shop Management System",
+                $"Dear {user.UserName},\n\nYou have successfully registered.\nYour shop '{shop.ShopName}' has been created.\n\nPlease subscribe to a plan to start using the system.\n\nShop Management System"
+            );
+        }
+        catch { }
 
         var roles = await _userManager.GetRolesAsync(user);
         var token = GenerateJwtToken(user, roles);
@@ -64,6 +70,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [Consumes("application/json")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Login([FromBody] LoginDto request)
     {
         var user = await _userManager.FindByNameAsync(request.Username);

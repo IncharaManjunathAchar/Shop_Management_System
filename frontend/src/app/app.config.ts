@@ -1,8 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
+import { FormsModule } from '@angular/forms';
+
 import Aura from '@primeuix/themes/aura';
 import { routes } from './app.routes';
 
@@ -11,6 +13,10 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(),
+
+    
+    importProvidersFrom(FormsModule),
+
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {

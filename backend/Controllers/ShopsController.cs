@@ -24,6 +24,15 @@ public class ShopsController : ControllerBase
         _env = env;
     }
 
+    [Authorize(Roles = "Shopkeeper")]
+    [HttpGet("my")]
+    public IActionResult GetMyShops()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var shops = _context.Shops.Where(s => s.UserId == userId).ToList();
+        return Ok(shops);
+    }
+
     [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> GetAll()

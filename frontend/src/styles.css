@@ -1,1 +1,77 @@
-/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #e6f4f1 0%, #fff7ed 100%);
+  min-height: 100vh;
+}
+
+:root {
+  --primary: #0d9488;
+  --primary-hover: #0f766e;
+  --secondary: #fb923c;
+  --secondary-hover: #f97316;
+  --accent: #2dd4bf;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #ccfbf1;
+}
+
+/* PrimeNG button overrides */
+.p-button {
+  background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+  border: none !important;
+}
+.p-button:hover {
+  background: linear-gradient(135deg, var(--primary-hover), #14b8a6) !important;
+}
+.p-button.p-button-success {
+  background: linear-gradient(135deg, #0d9488, #2dd4bf) !important;
+}
+.p-button.p-button-danger {
+  background: linear-gradient(135deg, #fb923c, #fdba74) !important;
+}
+.p-button.p-button-secondary {
+  background: #f1f5f9 !important;
+  color: var(--text-main) !important;
+}
+.p-button-outlined {
+  background: transparent !important;
+  border: 1px solid var(--primary) !important;
+  color: var(--primary) !important;
+}
+.p-button-outlined:hover {
+  background: #f0fdfa !important;
+}
+
+/* Card overrides */
+.p-card {
+  border-top: 3px solid var(--primary) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.08) !important;
+}
+
+/* Table overrides */
+.p-datatable .p-datatable-thead > tr > th {
+  background: linear-gradient(135deg, #f0fdfa, #fff7ed) !important;
+  color: var(--text-main) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid var(--border) !important;
+}
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: #f0fdfa !important;
+}
+
+/* Input overrides */
+.p-inputtext:focus, .p-select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15) !important;
+}
+
+/* Force light mode */
+.p-component { color-scheme: light; }
+.p-card, .p-dialog, .p-datatable { background: #ffffff !important; color: #1e293b !important; }
+.p-datatable .p-datatable-tbody > tr { background: #ffffff !important; color: #1e293b !important; }

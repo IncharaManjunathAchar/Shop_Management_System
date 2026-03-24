@@ -1,0 +1,182 @@
+<p-toast />
+
+<div class="inventory-page">
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <div class="header-left">
+      <i class="pi pi-box header-icon"></i>
+      <div>
+        <h2>Inventory Management</h2>
+        <span>{{ selectedShop?.shopName || 'Loading...' }}</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <p-select *ngIf="shops.length > 1" [(ngModel)]="selectedShop" [options]="shops" optionLabel="shopName" placeholder="Select Shop" (onChange)="onShopChange()" styleClass="shop-selector" />
+      <p-button label="Add New Item" icon="pi pi-plus" (onClick)="showAddDialog = true" styleClass="header-btn" />
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card teal">
+      <i class="pi pi-list"></i>
+      <div>
+        <span class="stat-value">{{ items.length }}</span>
+        <span class="stat-label">Total Items</span>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <i class="pi pi-exclamation-triangle"></i>
+      <div>
+        <span class="stat-value">{{ lowStockCount() }}</span>
+        <span class="stat-label">Low Stock</span>
+      </div>
+    </div>
+    <div class="stat-card dark">
+      <i class="pi pi-clock"></i>
+      <div>
+        <span class="stat-value">{{ expiringSoonCount() }}</span>
+        <span class="stat-label">Expiring Soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Forms -->
+  <div class="forms-row">
+
+    <!-- Purchase -->
+    <div class="action-card purchase-card">
+      <div class="action-card-header">
+        <i class="pi pi-arrow-down-circle"></i>
+        <h3>Add Stock (Purchase)</h3>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Select Item</label>
+          <p-select [(ngModel)]="purchaseForm.itemId" [options]="items" optionLabel="itemName" optionValue="itemId" placeholder="Select item" styleClass="w-full" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Quantity</label>
+            <p-inputnumber [(ngModel)]="purchaseForm.quantity" [min]="1" placeholder="Qty" styleClass="w-full" />
+          </div>
+          <div class="field">
+            <label>Cost Price</label>
+            <p-inputnumber [(ngModel)]="purchaseForm.costPrice" [min]="0" mode="currency" currency="USD" styleClass="w-full" />
+          </div>
+        </div>
+        <p-button label="Add Stock" icon="pi pi-plus" styleClass="w-full action-btn-teal" (onClick)="onPurchase()" />
+      </div>
+    </div>
+
+    <!-- Sale -->
+    <div class="action-card sale-card">
+      <div class="action-card-header">
+        <i class="pi pi-arrow-up-circle"></i>
+        <h3>Sell Item</h3>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Select Item</label>
+          <p-select [(ngModel)]="saleForm.itemId" [options]="items" optionLabel="itemName" optionValue="itemId" placeholder="Select item" styleClass="w-full" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Quantity</label>
+            <p-inputnumber [(ngModel)]="saleForm.quantity" [min]="1" placeholder="Qty" styleClass="w-full" />
+          </div>
+          <div class="field">
+            <label>Selling Price</label>
+            <p-inputnumber [(ngModel)]="saleForm.sellingPrice" [min]="0" mode="currency" currency="USD" styleClass="w-full" />
+          </div>
+        </div>
+        <p-button label="Record Sale" icon="pi pi-shopping-cart" styleClass="w-full action-btn-orange" (onClick)="onSale()" />
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-section">
+    <div class="table-header">
+      <h3>Stock Overview</h3>
+      <div class="filters">
+        <button [class.active]="filter === 'all'" (click)="setFilter('all')">All Items</button>
+        <button [class.active]="filter === 'low'" (click)="setFilter('low')">⚠ Low Stock</button>
+        <button [class.active]="filter === 'expiring'" (click)="setFilter('expiring')">🕒 Expiring Soon</button>
+      </div>
+    </div>
+
+    <p-table [value]="filteredItems" [paginator]="true" [rows]="10" [rowHover]="true" styleClass="p-datatable-gridlines">
+      <ng-template #header>
+        <tr>
+          <th>Item Name</th>
+          <th>Stock</th>
+          <th>Cost Price</th>
+          <th>Selling Price</th>
+          <th>Total Value</th>
+          <th>Expiry Date</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-item>
+        <tr>
+          <td><strong>{{ item.itemName }}</strong></td>
+          <td>
+            <p-tag [value]="item.quantity.toString()" [severity]="stockSeverity(item)" />
+            <span *ngIf="isLowStock(item)" class="low-label">Low</span>
+          </td>
+          <td>{{ item.costPrice | currency }}</td>
+          <td>{{ item.sellingPrice | currency }}</td>
+          <td><strong>{{ totalValue(item) | currency }}</strong></td>
+          <td>
+            {{ item.expiryDate | date:'mediumDate' }}
+            <i *ngIf="isExpiringSoon(item)" class="pi pi-exclamation-circle expiry-warn" title="Expiring soon"></i>
+          </td>
+          <td>
+            <p-button icon="pi pi-trash" severity="danger" [text]="true" (onClick)="deleteItem(item.itemId)" />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr><td colspan="7" class="empty">No items found.</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- Add Item Dialog -->
+<p-dialog header="Add New Item" [(visible)]="showAddDialog" [modal]="true" [style]="{ width: '480px' }">
+  <div class="form-grid" style="padding: 8px 0;">
+    <div class="field-row">
+      <div class="field">
+        <label>Item Name</label>
+        <input pInputText [(ngModel)]="newItem.itemName" placeholder="Item name" class="w-full" />
+      </div>
+      <div class="field">
+        <label>Initial Quantity</label>
+        <p-inputnumber [(ngModel)]="newItem.quantity" [min]="0" styleClass="w-full" />
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Cost Price</label>
+        <p-inputnumber [(ngModel)]="newItem.costPrice" mode="currency" currency="USD" styleClass="w-full" />
+      </div>
+      <div class="field">
+        <label>Selling Price</label>
+        <p-inputnumber [(ngModel)]="newItem.sellingPrice" mode="currency" currency="USD" styleClass="w-full" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Expiry Date</label>
+      <input type="date" [(ngModel)]="newItem.expiryDate" class="w-full date-input" />
+    </div>
+  </div>
+  <ng-template #footer>
+    <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="showAddDialog = false" />
+    <p-button label="Save Item" icon="pi pi-check" (onClick)="addItem()" />
+  </ng-template>
+</p-dialog>

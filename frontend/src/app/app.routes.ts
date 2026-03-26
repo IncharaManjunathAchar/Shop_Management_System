@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 // Shopkeeper
 import { InventoryComponent } from './components/Shopkepper/inventory/inventory.component';
+import { SubscriptionComponent } from './components/Shopkepper/subscription/subscription.component';
 
 // Admin
 import { DashboardComponent } from './components/Admin/dashboard/dashboard.component';
@@ -26,6 +27,7 @@ export const routes: Routes = [
 
   //  Shopkeeper Routes
   { path: 'inventory', component: InventoryComponent },
+  { path: 'subscription', component: SubscriptionComponent },
 
   //  Admin Routes
   { path: 'admin/dashboard', component: DashboardComponent },

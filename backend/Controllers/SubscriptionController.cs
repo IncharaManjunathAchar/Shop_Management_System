@@ -27,6 +27,7 @@ public class SubscriptionController : ControllerBase
     // ---- Subscription Plans ----
 
     [HttpGet("plans")]
+    [AllowAnonymous]
     public IActionResult GetPlans()
     {
         var plans = _context.SubscriptionPlans.ToList();

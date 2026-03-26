@@ -8,6 +8,7 @@ interface JwtPayload {
   nameid: string;
   unique_name: string;
   role: string | string[];
+  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string | string[];
   exp: number;
 }
 
@@ -50,7 +51,8 @@ export class AuthService {
     const token = this.getToken();
     if (!token) return '';
     const decoded = jwtDecode<JwtPayload>(token);
-    return Array.isArray(decoded.role) ? decoded.role[0] : decoded.role;
+    const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? decoded.role;
+    return Array.isArray(role) ? role[0] : (role ?? '');
   }
 
   getUserId(): string {

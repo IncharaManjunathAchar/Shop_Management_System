@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router'; // ✅ ADD THIS
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterModule], // ✅ ADD RouterModule
+  imports: [FormsModule, RouterModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
@@ -15,7 +15,7 @@ export class Login {
   username = '';
   password = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router) {}
 
   login() {
     if (!this.username || !this.password) {
@@ -23,18 +23,11 @@ export class Login {
       return;
     }
 
-    this.http.post<any>('https://localhost:5001/api/auth/login', {
-      username: this.username,
-      password: this.password
-    }).subscribe({
-      next: (res) => {
-        // ✅ store token
-        localStorage.setItem('token', res.token);
-
+    this.auth.login(this.username, this.password).subscribe({
+      next: () => {
         alert("Login successful");
-
-        // 👉 redirect to inventory (IMPORTANT CHANGE)
-        this.router.navigate(['/inventory']);
+        const role = this.auth.getRole();
+        this.router.navigate([role === 'Admin' ? '/admin/dashboard' : '/inventory']);
       },
       error: (err) => {
         alert(err.error || "Invalid credentials");

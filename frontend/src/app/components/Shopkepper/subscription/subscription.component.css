@@ -1,0 +1,107 @@
+.subscription-page { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+/* Header Banner */
+.header-banner {
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 60%, #fb923c 100%);
+  border-radius: 16px; padding: 20px 28px; margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon { font-size: 2rem; color: white; }
+.header-left h2 { font-size: 1.6rem; font-weight: 700; color: white; margin-bottom: 4px; }
+.header-left span { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
+
+/* Section Cards */
+.section {
+  background: white; border-radius: 14px; padding: 20px;
+  margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.section h2 {
+  font-size: 1rem; font-weight: 600; color: #1e293b;
+  border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; margin: 0 0 1rem;
+}
+
+/* Current Status Card */
+.status-card { display: flex; flex-direction: column; gap: 0.6rem; }
+.status-row { display: flex; justify-content: space-between; font-size: 0.95rem; }
+.label { color: #64748b; }
+.value { font-weight: 600; color: #1e293b; }
+.highlight { color: #fb923c; }
+
+.badge {
+  padding: 2px 10px; border-radius: 20px;
+  font-size: 0.82rem; font-weight: 600; text-transform: capitalize;
+}
+.status-active  { background: #ccfbf1; color: #0f766e; }
+.status-pending { background: #fff7ed; color: #c2410c; }
+.status-expired { background: #fee2e2; color: #991b1b; }
+
+.no-sub { color: #94a3b8; font-style: italic; }
+
+/* Request Banner */
+.request-banner {
+  padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500;
+}
+
+/* Plans Grid */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.plan-card {
+  border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1.4rem;
+  text-align: center; transition: box-shadow 0.2s;
+  border-top: 4px solid #0d9488;
+}
+.plan-card:hover { box-shadow: 0 4px 16px rgba(13,148,136,0.15); }
+
+.plan-card h3 { margin: 0 0 0.5rem; font-size: 1.1rem; color: #0f766e; }
+.price { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0.5rem 0; }
+.price span { font-size: 0.85rem; color: #64748b; font-weight: 400; }
+
+.features { list-style: none; padding: 0; margin: 0.8rem 0; text-align: left; font-size: 0.88rem; color: #475569; }
+.features li { margin-bottom: 4px; }
+.description { font-size: 0.85rem; color: #64748b; margin: 0.5rem 0 0.8rem; }
+
+.btn-choose {
+  margin-top: 0.8rem; width: 100%; padding: 0.5rem;
+  background: linear-gradient(135deg, #0d9488, #2dd4bf);
+  color: white; border: none; border-radius: 6px;
+  cursor: pointer; font-size: 0.95rem; font-weight: 600;
+  transition: opacity 0.2s;
+}
+.btn-choose:hover { opacity: 0.9; }
+
+/* Confirmation Dialog */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 999;
+}
+.confirm-dialog {
+  background: white; border-radius: 14px; padding: 2rem; width: 380px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2); border-top: 4px solid #0d9488;
+}
+.confirm-dialog h3 { margin: 0 0 1rem; color: #1e293b; }
+.confirm-dialog p { color: #475569; margin: 0.4rem 0; font-size: 0.95rem; }
+.note { font-size: 0.85rem; color: #94a3b8; margin-top: 0.8rem !important; }
+
+.dialog-actions { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end; }
+
+.btn-cancel {
+  padding: 0.5rem 1.2rem; border: 1.5px solid #e2e8f0;
+  border-radius: 6px; background: #f8fafc; cursor: pointer; color: #475569;
+}
+.btn-cancel:hover { border-color: #0d9488; color: #0d9488; }
+
+.btn-confirm {
+  padding: 0.5rem 1.2rem;
+  background: linear-gradient(135deg, #fb923c, #fdba74);
+  color: white; border: none; border-radius: 6px;
+  cursor: pointer; font-weight: 600;
+}
+.btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 768px) { .plans-grid { grid-template-columns: 1fr; } }

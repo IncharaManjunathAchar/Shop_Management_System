@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router, RouterModule } from '@angular/router'; // ✅ ADD THIS
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, RouterModule], // ✅ ADD RouterModule
+  imports: [FormsModule, RouterModule],
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
@@ -19,17 +19,15 @@ export class Register {
   shopAddress = '';
   contactNumber = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router) {}
 
   register() {
-
-    // ✅ validation
     if (!this.username || !this.email || !this.password) {
       alert("Please fill all required fields");
       return;
     }
 
-    this.http.post<any>('https://localhost:5001/api/auth/register', {
+    this.auth.register({
       username: this.username,
       email: this.email,
       password: this.password,
@@ -37,10 +35,8 @@ export class Register {
       shopAddress: this.shopAddress,
       contactNumber: this.contactNumber
     }).subscribe({
-      next: (res) => {
+      next: () => {
         alert("Registered successfully");
-
-        // 👉 redirect to login
         this.router.navigate(['/login']);
       },
       error: (err) => {

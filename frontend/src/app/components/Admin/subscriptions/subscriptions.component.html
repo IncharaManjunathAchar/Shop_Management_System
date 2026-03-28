@@ -1,0 +1,88 @@
+<div class="page">
+
+  <div class="header-banner">
+    <span class="header-icon">💳</span>
+    <div>
+      <h2>Subscriptions</h2>
+      <span>Approve requests and monitor all subscriptions</span>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-icon">✅</span>
+      <div><p class="stat-label">Active</p><p class="stat-value">{{ stats.active }}</p></div>
+    </div>
+    <div class="stat-card warn">
+      <span class="stat-icon">⏳</span>
+      <div><p class="stat-label">Pending</p><p class="stat-value">{{ stats.pending }}</p></div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">💰</span>
+      <div><p class="stat-label">Total Revenue</p><p class="stat-value">&#8377; {{ stats.revenue }}</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="filters">
+      <input [(ngModel)]="search" placeholder="🔍 Search by user or plan..." />
+      <button class="filter-btn" [class.active]="filter === 'all'"      (click)="filter = 'all'">All</button>
+      <button class="filter-btn" [class.active]="filter === 'pending'"  (click)="filter = 'pending'">Pending</button>
+      <button class="filter-btn" [class.active]="filter === 'approved'" (click)="filter = 'approved'">Approved</button>
+      <button class="filter-btn" [class.active]="filter === 'rejected'" (click)="filter = 'rejected'">Rejected</button>
+      <button class="filter-btn" [class.active]="filter === 'expired'"  (click)="filter = 'expired'">Expired</button>
+    </div>
+
+    <p class="empty" *ngIf="filtered.length === 0">No subscriptions found.</p>
+
+    <table *ngIf="filtered.length > 0">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Plan</th>
+          <th>Price</th>
+          <th>Request Date</th>
+          <th>Expiry</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of filtered" (click)="select(s)">
+          <td>{{ s.username }}</td>
+          <td>{{ s.planName }}</td>
+          <td>&#8377; {{ s.price }}</td>
+          <td>{{ s.startDate | date:'mediumDate' }}</td>
+          <td>{{ s.expiryDate | date:'mediumDate' }}</td>
+          <td><span class="badge" [ngClass]="badgeClass(s.status)">{{ s.status }}</span></td>
+          <td class="actions" (click)="$event.stopPropagation()">
+            <button class="btn-approve" *ngIf="s.status === 'Pending'" (click)="approve(s.subscriptionId)">Approve</button>
+            <button class="btn-reject"  *ngIf="s.status === 'Pending'" (click)="reject(s.subscriptionId)">Reject</button>
+            <span *ngIf="s.status !== 'Pending'" style="color:#94a3b8;font-size:0.82rem;">—</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="overlay" *ngIf="selected" (click)="close()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <h3>📋 Subscription Details</h3>
+      <div class="dialog-row"><span class="lbl">User</span><span class="val">{{ selected.username }}</span></div>
+      <div class="dialog-row"><span class="lbl">Plan</span><span class="val">{{ selected.planName }}</span></div>
+      <div class="dialog-row"><span class="lbl">Price</span><span class="val">&#8377; {{ selected.price }}</span></div>
+      <div class="dialog-row"><span class="lbl">Status</span><span class="val badge" [ngClass]="badgeClass(selected.status)">{{ selected.status }}</span></div>
+      <div class="dialog-row"><span class="lbl">Start Date</span><span class="val">{{ selected.startDate | date:'mediumDate' }}</span></div>
+      <div class="dialog-row"><span class="lbl">Expiry Date</span><span class="val">{{ selected.expiryDate | date:'mediumDate' }}</span></div>
+      <div class="dialog-row"><span class="lbl">Payment</span><span class="val">{{ selected.paymentStatus }}</span></div>
+      <div class="dialog-actions">
+        <button class="btn-cancel" (click)="close()">Close</button>
+        <button class="btn-approve" *ngIf="selected.status === 'Pending'" (click)="approve(selected.subscriptionId); close()">Approve</button>
+        <button class="btn-reject"  *ngIf="selected.status === 'Pending'" (click)="reject(selected.subscriptionId); close()">Reject</button>
+      </div>
+    </div>
+  </div>
+
+</div>

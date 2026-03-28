@@ -1,0 +1,23 @@
+<div class="sk-shell">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <img src="assests/Logo.png" class="app-logo" alt="app logo" />
+      Shop Manager
+    </div>
+    <div class="nav-links">
+      <a routerLink="/shopkeeper/dashboard"     routerLinkActive="active">📊 Dashboard</a>
+      <a routerLink="/shopkeeper/inventory"     routerLinkActive="active">📦 Inventory</a>
+      <a routerLink="/shopkeeper/transactions"  routerLinkActive="active">🧾 Transactions</a>
+      <a routerLink="/shopkeeper/subscription"  routerLinkActive="active">💳 Subscription</a>
+    </div>
+    <div class="nav-user">
+      <img *ngIf="logoUrl" [src]="logoUrl" class="nav-logo nav-logo-btn" alt="logo" (click)="router.navigate(['/shopkeeper/profile'])" />
+      <span *ngIf="!logoUrl" class="nav-logo-placeholder nav-logo-btn" (click)="router.navigate(['/shopkeeper/profile'])">🏪</span>
+      <span>{{ username }}</span>
+      <button (click)="logout()">Logout</button>
+    </div>
+  </nav>
+  <main class="sk-content">
+    <router-outlet />
+  </main>
+</div>

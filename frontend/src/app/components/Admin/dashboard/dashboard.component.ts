@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,24 +12,16 @@ import { HttpClient } from '@angular/common/http';
 })
 export class DashboardComponent implements OnInit {
 
-  subscriptions: any[] = [];
+  stats: any = null;
 
-  private apiUrl = 'https://localhost:5001/api/admin/usersubscriptions';
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef, private router: Router) {}
 
-  constructor(private http: HttpClient) {}
-
-  ngOnInit(): void {
-    this.getSubscriptions();
-  }
-
-  getSubscriptions() {
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (res) => {
-        this.subscriptions = res;
-      },
-      error: (err) => {
-        console.error('Error fetching subscriptions', err);
-      }
+  ngOnInit() {
+    this.api.getDashboard().subscribe({
+      next: res => { this.stats = res; this.cdr.detectChanges(); },
+      error: err => console.error('Dashboard error', err)
     });
   }
+
+  go(path: string) { this.router.navigate([path]); }
 }

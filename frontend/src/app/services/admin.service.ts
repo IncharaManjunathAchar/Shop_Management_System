@@ -1,22 +1,21 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AdminService {
-
-  private baseUrl = 'http://localhost:5244/api/admin';
+  private base = 'http://localhost:5244/api';
 
   constructor(private http: HttpClient) {}
 
-  // Get all subscriptions
   getSubscriptions() {
-    return this.http.get(`${this.baseUrl}/usersubscriptions`);
+    return this.http.get<any[]>(`${this.base}/subscriptions/pending`);
   }
 
-  // Approve subscription (you can customize API later)
   approveSubscription(id: number) {
-    return this.http.put(`${this.baseUrl}/approve/${id}`, {});
+    return this.http.put(`${this.base}/subscriptions/${id}/approve`, {});
+  }
+
+  rejectSubscription(id: number) {
+    return this.http.put(`${this.base}/subscriptions/${id}/reject`, {});
   }
 }

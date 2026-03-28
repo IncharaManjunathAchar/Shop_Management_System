@@ -67,8 +67,34 @@
 .filters button.active { background: #0d9488; color: white; border-color: #0d9488; }
 .filters button:hover:not(.active) { border-color: #0d9488; color: #0d9488; }
 
+.search-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9;
+}
+.search-input {
+  padding: 7px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+  font-size: 0.88rem; outline: none; min-width: 220px; flex: 1;
+}
+.search-input:focus { border-color: #0d9488; }
+.date-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.date-filters label { font-size: 0.78rem; color: #64748b; font-weight: 600; white-space: nowrap; }
+.date-input {
+  padding: 6px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+  font-size: 0.85rem; outline: none; color: #475569;
+}
+.date-input:focus { border-color: #0d9488; }
+.clear-btn {
+  padding: 6px 14px; border: 1.5px solid #fca5a5; border-radius: 20px;
+  background: #fef2f2; cursor: pointer; font-size: 0.82rem; color: #ef4444;
+}
+.clear-btn:hover { background: #fee2e2; }
+
 .low-label { font-size: 0.72rem; color: #fb923c; margin-left: 6px; font-weight: 600; }
 .expiry-warn { color: #fb923c; margin-left: 6px; }
+
+.stock-hint { margin-top: 6px; font-size: 0.82rem; font-weight: 600; }
+.stock-ok   { color: #0f766e; }
+.stock-warn { color: #dc2626; }
 .date-input { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; color: #1e293b; outline: none; }
 .date-input:focus { border-color: #0d9488; box-shadow: 0 0 0 2px rgba(13,148,136,0.15); }
 

@@ -9,6 +9,8 @@ interface JwtPayload {
   unique_name: string;
   role: string | string[];
   'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string | string[];
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': string;
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': string;
   exp: number;
 }
 
@@ -58,13 +60,15 @@ export class AuthService {
   getUserId(): string {
     const token = this.getToken();
     if (!token) return '';
-    return jwtDecode<JwtPayload>(token).nameid;
+    const decoded = jwtDecode<JwtPayload>(token);
+    return decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? decoded.nameid ?? '';
   }
 
   getUsername(): string {
     const token = this.getToken();
     if (!token) return '';
-    return jwtDecode<JwtPayload>(token).unique_name;
+    const decoded = jwtDecode<JwtPayload>(token);
+    return decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ?? decoded.unique_name ?? '';
   }
 
   getShopId(): number { return Number(localStorage.getItem('shopId') || 0); }

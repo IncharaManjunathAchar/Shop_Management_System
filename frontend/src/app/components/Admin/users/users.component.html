@@ -1,0 +1,61 @@
+<div class="page">
+
+  <div class="header-banner">
+    <span class="header-icon">👥</span>
+    <div>
+      <h2>Shopkeepers</h2>
+      <span>View and manage registered shopkeepers</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="filters">
+      <input [(ngModel)]="search" placeholder="🔍 Search by name or email..." />
+      <button class="filter-btn" [class.active]="filter === 'all'"     (click)="filter = 'all'">All</button>
+      <button class="filter-btn" [class.active]="filter === 'active'"  (click)="filter = 'active'">Active</button>
+      <button class="filter-btn" [class.active]="filter === 'pending'" (click)="filter = 'pending'">Pending</button>
+      <button class="filter-btn" [class.active]="filter === 'none'"    (click)="filter = 'none'">No Subscription</button>
+    </div>
+
+    <p class="empty" *ngIf="filtered.length === 0">No shopkeepers found.</p>
+
+    <table *ngIf="filtered.length > 0">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Plan</th>
+          <th>Subscription Status</th>
+          <th>Expiry</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of filtered" (click)="select(u)">
+          <td>{{ u.userName }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.subscription?.planName ?? '—' }}</td>
+          <td><span class="badge" [ngClass]="badgeClass(u.subscription?.status)">{{ u.subscription?.status ?? 'None' }}</span></td>
+          <td>{{ u.subscription?.expiryDate ? (u.subscription.expiryDate | date:'mediumDate') : '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="overlay" *ngIf="selected" (click)="close()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <h3>👤 {{ selected.userName }}</h3>
+      <div class="dialog-row"><span class="lbl">Email</span><span class="val">{{ selected.email }}</span></div>
+      <div class="dialog-row"><span class="lbl">Plan</span><span class="val">{{ selected.subscription?.planName ?? '—' }}</span></div>
+      <div class="dialog-row">
+        <span class="lbl">Subscription Status</span>
+        <span class="val badge" [ngClass]="badgeClass(selected.subscription?.status)">{{ selected.subscription?.status ?? 'None' }}</span>
+      </div>
+      <div class="dialog-row"><span class="lbl">Expiry</span><span class="val">{{ selected.subscription?.expiryDate ? (selected.subscription.expiryDate | date:'mediumDate') : '—' }}</span></div>
+      <div class="dialog-actions">
+        <button class="btn-cancel" (click)="close()">Close</button>
+      </div>
+    </div>
+  </div>
+
+</div>

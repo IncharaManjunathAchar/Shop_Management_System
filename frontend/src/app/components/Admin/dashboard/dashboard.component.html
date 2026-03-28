@@ -1,23 +1,145 @@
-<h2>Admin Dashboard</h2>
+<div class="dash-page">
 
-<h3>Subscribed Shopkeepers</h3>
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Welcome back, Admin. Here's what's happening today.</p>
+    </div>
+  </div>
 
-<table border="1">
-  <tr>
-    <th>Subscription ID</th>
-    <th>User ID</th>
-    <th>Plan ID</th>
-    <th>Start Date</th>
-    <th>Expiry Date</th>
-    <th>Status</th>
-  </tr>
+  <ng-container *ngIf="stats">
 
-  <tr *ngFor="let sub of subscriptions">
-    <td>{{ sub.subscriptionId }}</td>
-    <td>{{ sub.userId }}</td>
-    <td>{{ sub.planId }}</td>
-    <td>{{ sub.startDate | date }}</td>
-    <td>{{ sub.expiryDate | date }}</td>
-    <td>{{ sub.paymentStatus }}</td>
-  </tr>
-</table>
+    <!-- Stat Cards -->
+    <div class="cards-grid">
+
+      <div class="card" (click)="go('/admin/users')">
+        <div class="card-left teal">
+          <span>👥</span>
+        </div>
+        <div class="card-right">
+          <p class="card-label">Total Shopkeepers</p>
+          <p class="card-value">{{ stats.totalUsers }}</p>
+          <p class="card-sub">Registered users</p>
+        </div>
+      </div>
+
+      <div class="card" (click)="go('/admin/users')">
+        <div class="card-left blue">
+          <span>🏪</span>
+        </div>
+        <div class="card-right">
+          <p class="card-label">Total Shops</p>
+          <p class="card-value">{{ stats.totalShops }}</p>
+          <p class="card-sub">Active shops</p>
+        </div>
+      </div>
+
+      <div class="card" (click)="go('/admin/subscriptions')">
+        <div class="card-left green">
+          <span>✅</span>
+        </div>
+        <div class="card-right">
+          <p class="card-label">Active Subscriptions</p>
+          <p class="card-value">{{ stats.activeSubscriptions }}</p>
+          <p class="card-sub">Currently running</p>
+        </div>
+      </div>
+
+      <div class="card" (click)="go('/admin/subscriptions')">
+        <div class="card-left orange">
+          <span>⏳</span>
+        </div>
+        <div class="card-right">
+          <p class="card-label">Pending Requests</p>
+          <p class="card-value">{{ stats.pendingSubscriptions }}</p>
+          <p class="card-sub">Awaiting approval</p>
+        </div>
+      </div>
+
+      <div class="card" (click)="go('/admin/subscriptions')">
+        <div class="card-left purple">
+          <span>💰</span>
+        </div>
+        <div class="card-right">
+          <p class="card-label">Total Revenue</p>
+          <p class="card-value">&#8377; {{ stats.totalRevenue }}</p>
+          <p class="card-sub">From approved plans</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Alert Banner -->
+    <div class="alert-banner" *ngIf="stats.pendingSubscriptions > 0" (click)="go('/admin/subscriptions')">
+      <span class="alert-dot"></span>
+      <span><strong>{{ stats.pendingSubscriptions }}</strong> subscription request(s) are waiting for your approval.</span>
+      <span class="alert-action">Review Now →</span>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="bottom-row">
+
+      <!-- Quick Actions -->
+      <div class="panel">
+        <h3>Quick Actions</h3>
+        <div class="action-list">
+          <div class="action-item" (click)="go('/admin/subscriptions')">
+            <span class="action-icon teal">📋</span>
+            <div>
+              <p class="action-title">Subscription Requests</p>
+              <p class="action-desc">Review and approve pending requests</p>
+            </div>
+            <span class="chevron">›</span>
+          </div>
+          <div class="action-item" (click)="go('/admin/users')">
+            <span class="action-icon blue">👥</span>
+            <div>
+              <p class="action-title">Manage Shopkeepers</p>
+              <p class="action-desc">View all registered shopkeepers</p>
+            </div>
+            <span class="chevron">›</span>
+          </div>
+          <div class="action-item" (click)="go('/admin/plans')">
+            <span class="action-icon purple">📦</span>
+            <div>
+              <p class="action-title">Manage Plans</p>
+              <p class="action-desc">Create, edit or delete plans</p>
+            </div>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Summary -->
+      <div class="panel">
+        <h3>System Summary</h3>
+        <div class="summary-list">
+          <div class="summary-row">
+            <span class="summary-label">Total Shopkeepers</span>
+            <span class="summary-value">{{ stats.totalUsers }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total Shops</span>
+            <span class="summary-value">{{ stats.totalShops }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Active Subscriptions</span>
+            <span class="summary-value teal-text">{{ stats.activeSubscriptions }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Pending Approvals</span>
+            <span class="summary-value orange-text">{{ stats.pendingSubscriptions }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total Revenue</span>
+            <span class="summary-value">&#8377; {{ stats.totalRevenue }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

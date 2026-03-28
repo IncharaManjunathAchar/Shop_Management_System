@@ -104,6 +104,9 @@ using (var scope = app.Services.CreateScope())
     if (!await roleManager.RoleExistsAsync("Admin"))
         await roleManager.CreateAsync(new IdentityRole("Admin"));
 
+    if (!await roleManager.RoleExistsAsync("Shopkeeper"))
+        await roleManager.CreateAsync(new IdentityRole("Shopkeeper"));
+
     if (await userManager.FindByNameAsync("admin") == null)
     {
         var admin = new IdentityUser { UserName = "admin", Email = "admin@shop.com" };
@@ -119,11 +122,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-
 app.UseCors("AllowAngular");
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:4200");
+    }
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

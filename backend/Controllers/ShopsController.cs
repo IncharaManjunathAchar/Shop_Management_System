@@ -75,7 +75,7 @@ public class ShopsController : ControllerBase
 
         // Check active subscription
         var subscription = await _context.UserSubscriptions
-            .Where(s => s.UserId == userId && s.ExpiryDate >= DateTime.Now)
+            .Where(s => s.UserId == userId && s.Status == "Approved" && s.ExpiryDate >= DateTime.Now)
             .OrderByDescending(s => s.ExpiryDate)
             .FirstOrDefaultAsync();
 
@@ -85,6 +85,10 @@ public class ShopsController : ControllerBase
         var plan = await _context.SubscriptionPlans.FindAsync(subscription.PlanId);
         if (plan == null)
             return BadRequest("Subscription plan not found.");
+
+        // Free Trial cannot add more shops
+        if (plan.TrialDays > 0)
+            return BadRequest("Free Trial plan does not allow adding multiple shops. Please upgrade to Monthly or Yearly.");
 
         // Check shop count against plan limit
         var shopCount = await _context.Shops.CountAsync(s => s.UserId == userId);

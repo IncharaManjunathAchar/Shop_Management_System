@@ -11,13 +11,13 @@
     </div>
   </div>
 
-  <!-- Section 1: Current Subscription Status -->
+  <!-- Current Subscription -->
   <div class="section current-status">
     <h2>Current Subscription</h2>
     <div *ngIf="current; else noSub" class="status-card">
       <div class="status-row">
         <span class="label">Plan</span>
-        <span class="value">{{ current.planName ?? current.plan?.planName }}</span>
+        <span class="value">{{ current.plan?.planName }}</span>
       </div>
       <div class="status-row">
         <span class="label">Status</span>
@@ -32,7 +32,7 @@
         <span class="value">{{ current.expiryDate | date:'mediumDate' }}</span>
       </div>
       <div class="status-row" *ngIf="trialDaysLeft > 0">
-        <span class="label">Trial Days Left</span>
+        <span class="label">Days Left</span>
         <span class="value highlight">{{ trialDaysLeft }} days</span>
       </div>
     </div>
@@ -41,43 +41,56 @@
     </ng-template>
   </div>
 
-  <!-- Section 2: Request Status -->
+  <!-- Request Status -->
   <div class="section request-status" *ngIf="current">
     <h2>Request Status</h2>
     <div class="request-banner" [ngClass]="statusClass">
       <ng-container [ngSwitch]="current.status?.toLowerCase()">
         <span *ngSwitchCase="'pending'">🟡 Your request is pending admin approval.</span>
-        <span *ngSwitchCase="'active'">🟢 Your plan is active and running.</span>
+        <span *ngSwitchCase="'approved'">🟢 Your plan is active and running.</span>
         <span *ngSwitchCase="'expired'">🔴 Your plan has expired. Please choose a new plan.</span>
         <span *ngSwitchCase="'rejected'">🔴 Your request was rejected. Please choose another plan.</span>
         <span *ngSwitchDefault>—</span>
       </ng-container>
     </div>
+    <button class="btn-dashboard" *ngIf="current.status === 'Approved'" (click)="router.navigate(['/shopkeeper/dashboard'])">🚀 Go to Dashboard</button>
+    <button class="btn-cancel-sub" *ngIf="current.status === 'Approved' || current.status === 'Pending'" (click)="router.navigate(['/shopkeeper/profile'])">🚫 Cancel Subscription</button>
   </div>
 
-  <!-- Section 3: Available Plans -->
+  <!-- Available Plans -->
   <div class="section plans">
     <h2>Available Plans</h2>
     <div class="plans-grid">
       <div class="plan-card" *ngFor="let plan of plans">
         <h3>{{ plan.planName }}</h3>
-        <p class="price">₹{{ plan.price }} <span>/ {{ plan.durationDays }} days</span></p>
+        <p class="price">₹ {{ plan.price }} <span>/ {{ plan.durationDays }} days</span></p>
         <p class="description">{{ plan.description }}</p>
-        <button class="btn-choose" (click)="selectPlan(plan)">Choose Plan</button>
+        <p class="meta">Max {{ plan.maxShops }} shop(s)</p>
+        <button class="btn-choose" (click)="selectPlan(plan)"
+          [disabled]="current?.status === 'Approved' || current?.status === 'Pending'">
+          Choose Plan
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Section 4: Confirmation Dialog -->
+  <!-- Success Toast -->
+  <div class="toast" *ngIf="sent">
+    ✅ Request sent! Awaiting admin approval.
+  </div>
+
+  <!-- Confirmation Dialog -->
   <div class="overlay" *ngIf="showConfirm">
     <div class="confirm-dialog">
       <h3>Confirm Subscription</h3>
-      <p>You are about to request the <strong>{{ selectedPlan?.planName }}</strong> plan for <strong>₹{{ selectedPlan?.price }}</strong>.</p>
+      <p>You are about to request the <strong>{{ selectedPlan?.planName }}</strong> plan for <strong>₹ {{ selectedPlan?.price }}</strong>.</p>
       <p class="note">Your request will be sent to the admin for approval.</p>
+      <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
       <div class="dialog-actions">
         <button class="btn-cancel" (click)="cancelConfirm()">Cancel</button>
         <button class="btn-confirm" (click)="confirmSubscribe()" [disabled]="loading">
-          {{ loading ? 'Sending...' : 'Confirm' }}
+          <span *ngIf="!loading">Confirm</span>
+          <span *ngIf="loading">Sending... ⏳</span>
         </button>
       </div>
     </div>

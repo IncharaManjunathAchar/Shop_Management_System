@@ -68,6 +68,11 @@ public class TransactionsController : ControllerBase
         }
         else if (transaction.TransactionType == "Purchase")
         {
+            // Weighted average cost price
+            var totalQty = item.Quantity + transaction.Quantity;
+            item.CostPrice = totalQty > 0
+                ? ((item.CostPrice * item.Quantity) + (transaction.UnitPrice * transaction.Quantity)) / totalQty
+                : transaction.UnitPrice;
             item.Quantity += transaction.Quantity;
         }
         else

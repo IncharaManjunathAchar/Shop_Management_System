@@ -1,0 +1,88 @@
+<div class="tx-page">
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <div class="header-left">
+      <span class="header-icon">🧾</span>
+      <div>
+        <h2>Transactions</h2>
+        <span>History, profit & loss overview</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="stats-row">
+    <div class="stat-card teal">
+      <span class="stat-icon">💵</span>
+      <div>
+        <span class="stat-value">₹ {{ totalSales | number:'1.0-0' }}</span>
+        <span class="stat-label">Total Sales</span>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <span class="stat-icon">🛍️</span>
+      <div>
+        <span class="stat-value">₹ {{ totalPurchases | number:'1.0-0' }}</span>
+        <span class="stat-label">Total Purchases</span>
+      </div>
+    </div>
+    <div class="stat-card" [ngClass]="netProfit >= 0 ? 'green' : 'red'">
+      <span class="stat-icon">📈</span>
+      <div>
+        <span class="stat-value" [class.negative]="netProfit < 0">₹ {{ netProfit | number:'1.0-0' }}</span>
+        <span class="stat-label">Net Profit</span>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <span class="stat-icon">🔢</span>
+      <div>
+        <span class="stat-value">{{ filtered.length }}</span>
+        <span class="stat-label">Transactions</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="section">
+    <div class="filters-row">
+      <input [(ngModel)]="search" placeholder="🔍 Search by item name..." class="search-input" />
+      <input type="date" [(ngModel)]="dateFrom" class="date-input" />
+      <input type="date" [(ngModel)]="dateTo"   class="date-input" />
+      <button class="filter-btn" [class.active]="filter === 'all'"      (click)="filter = 'all'">All</button>
+      <button class="filter-btn" [class.active]="filter === 'Sale'"     (click)="filter = 'Sale'">Sales</button>
+      <button class="filter-btn" [class.active]="filter === 'Purchase'" (click)="filter = 'Purchase'">Purchases</button>
+      <button class="clear-btn" (click)="clearFilters()">✕ Clear</button>
+    </div>
+
+    <p class="empty" *ngIf="filtered.length === 0">No transactions found.</p>
+
+    <table *ngIf="filtered.length > 0">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Item ID</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of filtered">
+          <td>
+            <span class="badge" [ngClass]="t.transactionType === 'Sale' ? 'badge-sale' : 'badge-purchase'">
+              {{ t.transactionType === 'Sale' ? '💵 Sale' : '🛍️ Purchase' }}
+            </span>
+          </td>
+          <td>{{ t.itemId }}</td>
+          <td>{{ t.quantity }}</td>
+          <td>₹ {{ t.unitPrice | number:'1.0-2' }}</td>
+          <td><strong>₹ {{ t.totalAmount | number:'1.0-2' }}</strong></td>
+          <td>{{ t.transactionDate | date:'MMM d, y, h:mm a' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

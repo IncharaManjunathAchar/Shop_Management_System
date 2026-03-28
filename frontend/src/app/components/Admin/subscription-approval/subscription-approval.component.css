@@ -1,0 +1,43 @@
+.approval-page { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+.header-banner {
+  display: flex; align-items: center; gap: 16px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f766e 100%);
+  border-radius: 16px; padding: 20px 28px; margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.header-icon { font-size: 2rem; }
+.header-banner h2 { font-size: 1.6rem; font-weight: 700; color: white; margin: 0 0 4px; }
+.header-banner span { color: rgba(255,255,255,0.75); font-size: 0.9rem; }
+
+.section {
+  background: white; border-radius: 14px; padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+thead tr { background: #f8fafc; }
+th { text-align: left; padding: 10px 14px; color: #64748b; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; }
+td { padding: 10px 14px; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
+tbody tr:hover { background: #f8fafc; }
+
+.badge { padding: 2px 10px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; text-transform: capitalize; }
+.status-pending { background: #fff7ed; color: #c2410c; }
+
+.actions { display: flex; gap: 8px; }
+
+.btn-approve {
+  padding: 5px 14px; border: none; border-radius: 6px;
+  background: linear-gradient(135deg, #0d9488, #2dd4bf);
+  color: white; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+}
+.btn-approve:hover { opacity: 0.9; }
+
+.btn-reject {
+  padding: 5px 14px; border: none; border-radius: 6px;
+  background: linear-gradient(135deg, #ef4444, #fca5a5);
+  color: white; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+}
+.btn-reject:hover { opacity: 0.9; }
+
+.empty { color: #94a3b8; font-style: italic; }

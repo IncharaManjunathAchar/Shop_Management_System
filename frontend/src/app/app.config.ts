@@ -1,9 +1,10 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import { FormsModule } from '@angular/forms';
+import { HttpInterceptorFn } from '@angular/common/http';
 
 // PrimeNG Theme
 import Aura from '@primeuix/themes/aura';
@@ -11,29 +12,26 @@ import Aura from '@primeuix/themes/aura';
 // Routes
 import { routes } from './app.routes';
 
+const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem('token');
+  const isAuthEndpoint = req.url.includes('/api/auth/');
+  if (token && token.trim() !== '' && !isAuthEndpoint) {
+    req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+  }
+  return next(req);
+};
+
 export const appConfig: ApplicationConfig = {
   providers: [
-
-    // ✅ Routing
     provideRouter(routes),
-
-    // ✅ HTTP Client (API calls)
-    provideHttpClient(withFetch()),
-
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     importProvidersFrom(FormsModule),
-
-    // ✅ Animations (required for PrimeNG)
     provideAnimationsAsync(),
-
-    // ✅ PrimeNG Theme Setup
     providePrimeNG({
       theme: {
         preset: Aura,
-        options: {
-          darkModeSelector: 'none'
-        }
+        options: { darkModeSelector: 'none' }
       }
     })
-
   ]
 };

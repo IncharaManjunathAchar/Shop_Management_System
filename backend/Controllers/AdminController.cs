@@ -27,13 +27,45 @@ public class AdminController : ControllerBase
         var activeSubscriptions = _context.UserSubscriptions
             .Count(s => s.Status == "Approved" && s.ExpiryDate >= DateTime.Now);
         var totalUsers = (await _userManager.GetUsersInRoleAsync("Shopkeeper")).Count;
+        var pendingSubscriptions = _context.UserSubscriptions.Count(s => s.Status == "Pending");
+        var expiringSoon = _context.UserSubscriptions
+            .Count(s => s.Status == "Approved" && s.ExpiryDate >= DateTime.Now && s.ExpiryDate <= DateTime.Now.AddDays(7));
+        var totalRevenue = _context.UserSubscriptions
+            .Where(s => s.Status == "Approved")
+            .Join(_context.SubscriptionPlans, us => us.PlanId, p => p.PlanId, (us, p) => p.Price)
+            .Sum();
 
         return Ok(new
         {
             TotalShops = totalShops,
             ActiveSubscriptions = activeSubscriptions,
-            TotalUsers = totalUsers
+            TotalUsers = totalUsers,
+            PendingSubscriptions = pendingSubscriptions,
+            ExpiringSoon = expiringSoon,
+            TotalRevenue = totalRevenue
         });
+    }
+
+    [HttpGet("subscriptions")]
+    public IActionResult GetAllSubscriptions()
+    {
+        var subs = _context.UserSubscriptions
+            .Select(s => new
+            {
+                s.SubscriptionId,
+                s.UserId,
+                Username = s.User != null ? s.User.UserName : null,
+                s.PlanId,
+                PlanName = s.Plan != null ? s.Plan.PlanName : null,
+                Price = s.Plan != null ? s.Plan.Price : 0,
+                s.StartDate,
+                s.ExpiryDate,
+                s.Status,
+                s.PaymentStatus
+            })
+            .OrderByDescending(s => s.SubscriptionId)
+            .ToList();
+        return Ok(subs);
     }
 
     [HttpGet("shops")]

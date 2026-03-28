@@ -111,10 +111,14 @@ public class SubscriptionController : ControllerBase
             .OrderByDescending(s => s.ExpiryDate)
             .FirstOrDefault();
 
-        if (subscription == null)
-            return NotFound("No active subscription found");
+        var isActive = subscription?.Status == "Approved";
 
-        return Ok(subscription);
+        return Ok(new
+        {
+            isActive,
+            status = subscription?.Status ?? "None",
+            subscription
+        });
     }
 
     [HttpPost("users/{userId}/subscribe/{planId}")]

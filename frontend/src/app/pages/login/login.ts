@@ -25,9 +25,12 @@ export class Login {
 
     this.auth.login(this.username, this.password).subscribe({
       next: () => {
-        alert("Login successful");
         const role = this.auth.getRole();
-        this.router.navigate([role === 'Admin' ? '/admin/dashboard' : '/inventory']);
+        if (role === 'Admin') {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/subscriptionspk']);
+        }
       },
       error: (err) => {
         alert(err.error || "Invalid credentials");

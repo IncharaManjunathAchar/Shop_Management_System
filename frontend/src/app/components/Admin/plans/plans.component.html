@@ -1,0 +1,97 @@
+<div class="page">
+
+  <div class="header-banner">
+    <span class="header-icon">📦</span>
+    <div>
+      <h2>Plans Management</h2>
+      <span>Create, edit and delete subscription plans</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h2>All Plans</h2>
+      <button class="btn-primary" (click)="openAdd()">+ Add Plan</button>
+    </div>
+
+    <p class="empty" *ngIf="plans.length === 0">No plans found.</p>
+
+    <table *ngIf="plans.length > 0">
+      <thead>
+        <tr>
+          <th>Plan Name</th>
+          <th>Price</th>
+          <th>Duration</th>
+          <th>Trial Days</th>
+          <th>Max Shops</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of plans">
+          <td><strong>{{ p.planName }}</strong></td>
+          <td>&#8377; {{ p.price }}</td>
+          <td>{{ p.durationDays }} days</td>
+          <td>{{ p.trialDays }}</td>
+          <td>{{ p.maxShops }}</td>
+          <td>{{ p.description }}</td>
+          <td class="actions">
+            <button class="btn-approve" (click)="openEdit(p)">Edit</button>
+            <button class="btn-reject"  (click)="confirmDelete(p)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add / Edit Form -->
+  <div class="overlay" *ngIf="showForm" (click)="showForm = false">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <h3>{{ editing ? 'Edit Plan' : 'Add New Plan' }}</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Plan Name</label>
+          <input [(ngModel)]="form.planName" placeholder="e.g. Premium" />
+        </div>
+        <div class="form-group">
+          <label>Price (&#8377;)</label>
+          <input type="number" [(ngModel)]="form.price" />
+        </div>
+        <div class="form-group">
+          <label>Duration (Days)</label>
+          <input type="number" [(ngModel)]="form.durationDays" />
+        </div>
+        <div class="form-group">
+          <label>Trial Days</label>
+          <input type="number" [(ngModel)]="form.trialDays" />
+        </div>
+        <div class="form-group">
+          <label>Max Shops</label>
+          <input type="number" [(ngModel)]="form.maxShops" />
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea [(ngModel)]="form.description" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn-cancel" (click)="showForm = false">Cancel</button>
+        <button class="btn-primary" (click)="save()">{{ editing ? 'Update' : 'Create' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm -->
+  <div class="overlay" *ngIf="deleteTarget" (click)="deleteTarget = null">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <h3>Delete Plan</h3>
+      <p style="color:#475569">Are you sure you want to delete <strong>{{ deleteTarget.planName }}</strong>?</p>
+      <div class="dialog-actions">
+        <button class="btn-cancel" (click)="deleteTarget = null">Cancel</button>
+        <button class="btn-reject" (click)="doDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>

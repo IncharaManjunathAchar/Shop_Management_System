@@ -1,0 +1,31 @@
+.sk-shell { display: flex; flex-direction: column; min-height: 100vh; background: #f8fafc; }
+
+.navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  padding: 0 28px; height: 60px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-brand { color: white; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.nav-logo { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(255,255,255,0.4); }
+.nav-logo-placeholder { font-size: 1.6rem; }
+.nav-logo-btn { cursor: pointer; transition: opacity 0.2s; }
+.nav-logo-btn:hover { opacity: 0.8; }
+.app-logo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.nav-links { display: flex; gap: 4px; }
+.nav-links a {
+  color: rgba(255,255,255,0.8); text-decoration: none;
+  padding: 6px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.15); color: white; }
+.nav-user { display: flex; align-items: center; gap: 12px; }
+.nav-user span { color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+.nav-user button {
+  padding: 5px 14px; border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 6px; background: transparent; color: white;
+  cursor: pointer; font-size: 0.85rem; transition: background 0.2s;
+}
+.nav-user button:hover { background: rgba(255,255,255,0.15); }
+.sk-content { flex: 1; }

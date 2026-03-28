@@ -1,0 +1,21 @@
+<div class="admin-shell">
+
+  <nav class="navbar">
+    <div class="nav-brand">🛠️ Admin Panel</div>
+    <div class="nav-links">
+      <a routerLink="/admin/dashboard"     routerLinkActive="active">📊 Dashboard</a>
+      <a routerLink="/admin/users"         routerLinkActive="active">👥 Users</a>
+      <a routerLink="/admin/subscriptions" routerLinkActive="active">💳 Subscriptions</a>
+      <a routerLink="/admin/plans"         routerLinkActive="active">📦 Plans</a>
+    </div>
+    <div class="nav-user">
+      <span>👤 {{ username }}</span>
+      <button (click)="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <main class="admin-content">
+    <router-outlet />
+  </main>
+
+</div>

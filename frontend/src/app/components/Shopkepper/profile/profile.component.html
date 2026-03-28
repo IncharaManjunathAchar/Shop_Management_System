@@ -1,0 +1,160 @@
+<div class="profile-page" *ngIf="profile">
+
+  <!-- Header -->
+  <div class="header-banner">
+    <div class="header-left">
+      <span class="header-icon">👤</span>
+      <div>
+        <h2>My Profile</h2>
+        <span>Manage your account and shop details</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-edit" *ngIf="!editMode" (click)="editMode = true">✏️ Edit Profile</button>
+      <button class="btn-save" *ngIf="editMode" (click)="save()" [disabled]="saving">{{ saving ? 'Saving...' : '💾 Save' }}</button>
+      <button class="btn-cancel" *ngIf="editMode" (click)="cancel()">✕ Cancel</button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="msg success" *ngIf="successMsg">✅ {{ successMsg }}</div>
+  <div class="msg error"   *ngIf="errorMsg">🔴 {{ errorMsg }}</div>
+
+  <div class="content-grid">
+
+    <!-- Left Column -->
+    <div class="left-col">
+
+      <!-- Logo Section -->
+      <div class="card logo-card">
+        <h3>🖼️ Shop Logo</h3>
+        <div class="logo-wrap">
+          <img *ngIf="logoUrl" [src]="logoUrl" alt="Shop Logo" class="logo-img" />
+          <div *ngIf="!logoUrl" class="logo-placeholder">🏪</div>
+        </div>
+        <label class="btn-upload" *ngIf="editMode">
+          📁 {{ logoUrl ? 'Change Logo' : 'Upload Logo' }}
+          <input type="file" accept="image/*" (change)="onLogoSelect($event)" hidden />
+        </label>
+        <p class="logo-hint" *ngIf="editMode">JPG, PNG or WebP · Max 2MB</p>
+      </div>
+
+      <!-- Subscription Section -->
+      <div class="card sub-card">
+        <h3>💳 Subscription</h3>
+        <div *ngIf="profile.subscription; else noSub">
+          <div class="info-row">
+            <span class="lbl">Plan</span>
+            <span class="val">{{ profile.subscription.planName ?? '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Status</span>
+            <span class="val"><span class="badge" [ngClass]="subBadgeClass">{{ profile.subscription.status }}</span></span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Expires</span>
+            <span class="val">{{ profile.subscription.expiryDate | date:'mediumDate' }}</span>
+          </div>
+          <button class="btn-danger" *ngIf="profile.subscription.status === 'Approved' || profile.subscription.status === 'Pending'" (click)="showCancelConfirm = true">
+            🚫 Cancel Subscription
+          </button>
+        </div>
+        <ng-template #noSub>
+          <p class="empty">No active subscription.</p>
+          <button class="btn-edit" (click)="router.navigate(['/shopkeeper/subscription'])">View Plans →</button>
+        </ng-template>
+      </div>
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-col">
+
+      <!-- Profile Info -->
+      <div class="card">
+        <h3>Profile Info</h3>
+        <div class="info-row">
+          <span class="lbl">Username</span>
+          <span class="val">{{ profile.userName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="lbl">Email</span>
+          <span class="val muted">{{ profile.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="lbl">Role</span>
+          <span class="val"><span class="badge badge-active">{{ profile.role }}</span></span>
+        </div>
+        <div class="info-row">
+          <span class="lbl">Phone</span>
+          <span class="val" *ngIf="!editMode">{{ profile.phoneNumber || '—' }}</span>
+          <input *ngIf="editMode" [(ngModel)]="form.phoneNumber" placeholder="Enter phone number" class="edit-input" />
+        </div>
+      </div>
+
+      <!-- Shops -->
+      <div class="card">
+        <div class="section-header">
+          <h3>🏪 My Shops</h3>
+          <button class="btn-add-shop" (click)="showAddShop = true">+ Add Shop</button>
+        </div>
+        <p class="plan-hint" *ngIf="profile.subscription">
+          {{ profile.subscription.planName }} plan · {{ shops.length }} / {{ profile.subscription.planName === 'Yearly' ? 7 : profile.subscription.planName === 'Monthly' ? 5 : 1 }} shops used
+        </p>
+        <p class="empty" *ngIf="shops.length === 0">No shops found.</p>
+        <div class="shop-list">
+          <div class="shop-item" *ngFor="let s of shops">
+            <div class="shop-logo">
+              <img *ngIf="s.logoUrl" [src]="'http://localhost:5244' + s.logoUrl" alt="logo" />
+              <span *ngIf="!s.logoUrl">🏪</span>
+            </div>
+            <div class="shop-info">
+              <p class="shop-name">{{ s.shopName }}</p>
+              <p class="shop-addr">{{ s.shopAddress }}</p>
+              <p class="shop-addr">📞 {{ s.contactNumber }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Add Shop Dialog -->
+<div class="overlay" *ngIf="showAddShop" (click)="showAddShop = false">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <h3>🏪 Add New Shop</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Shop Name</label>
+        <input [(ngModel)]="newShop.shopName" placeholder="e.g. My Store" class="edit-input full" />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <input [(ngModel)]="newShop.shopAddress" placeholder="Shop address" class="edit-input full" />
+      </div>
+      <div class="form-group">
+        <label>Contact Number</label>
+        <input [(ngModel)]="newShop.contactNumber" placeholder="Phone number" class="edit-input full" />
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-cancel" (click)="showAddShop = false">Cancel</button>
+      <button class="btn-save-dialog" (click)="addShop()" [disabled]="addingShop">{{ addingShop ? 'Adding...' : 'Add Shop' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Subscription Confirm -->
+<div class="overlay" *ngIf="showCancelConfirm" (click)="showCancelConfirm = false">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <h3>Cancel Subscription</h3>
+    <p>Are you sure you want to cancel your current subscription? You will lose access to all features.</p>
+    <div class="dialog-actions">
+      <button class="btn-cancel" (click)="showCancelConfirm = false">Keep Subscription</button>
+      <button class="btn-danger" (click)="cancelSubscription()">Yes, Cancel</button>
+    </div>
+  </div>
+</div>

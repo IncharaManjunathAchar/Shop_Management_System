@@ -63,7 +63,7 @@
           </div>
           <div class="field">
             <label>Cost Price</label>
-            <p-inputnumber [(ngModel)]="purchaseForm.costPrice" [min]="0" mode="currency" currency="USD" styleClass="w-full" />
+            <p-inputnumber [(ngModel)]="purchaseForm.costPrice" [min]="0" prefix="₹ " styleClass="w-full" />
           </div>
         </div>
         <p-button label="Add Stock" icon="pi pi-plus" styleClass="w-full action-btn-teal" (onClick)="onPurchase()" />
@@ -80,15 +80,16 @@
         <div class="field">
           <label>Select Item</label>
           <p-select [(ngModel)]="saleForm.itemId" [options]="items" optionLabel="itemName" optionValue="itemId" placeholder="Select item" styleClass="w-full" />
+          <div class="stock-hint" *ngIf="selectedSaleItem">
+            <span [ngClass]="selectedSaleItem.quantity <= 3 ? 'stock-warn' : 'stock-ok'">
+              {{ selectedSaleItem.quantity === 0 ? '🔴 Out of stock' : selectedSaleItem.quantity <= 3 ? '⚠ Only ' + selectedSaleItem.quantity + ' unit(s) left' : '✅ ' + selectedSaleItem.quantity + ' unit(s) available' }}
+            </span>
+          </div>
         </div>
         <div class="field-row">
           <div class="field">
             <label>Quantity</label>
             <p-inputnumber [(ngModel)]="saleForm.quantity" [min]="1" placeholder="Qty" styleClass="w-full" />
-          </div>
-          <div class="field">
-            <label>Selling Price</label>
-            <p-inputnumber [(ngModel)]="saleForm.sellingPrice" [min]="0" mode="currency" currency="USD" styleClass="w-full" />
           </div>
         </div>
         <p-button label="Record Sale" icon="pi pi-shopping-cart" styleClass="w-full action-btn-orange" (onClick)="onSale()" />
@@ -102,9 +103,19 @@
     <div class="table-header">
       <h3>Stock Overview</h3>
       <div class="filters">
-        <button [class.active]="filter === 'all'" (click)="setFilter('all')">All Items</button>
-        <button [class.active]="filter === 'low'" (click)="setFilter('low')">⚠ Low Stock</button>
+        <button [class.active]="filter === 'all'"      (click)="setFilter('all')">All Items</button>
+        <button [class.active]="filter === 'low'"      (click)="setFilter('low')">⚠ Low Stock</button>
         <button [class.active]="filter === 'expiring'" (click)="setFilter('expiring')">🕒 Expiring Soon</button>
+      </div>
+    </div>
+    <div class="search-bar">
+      <input [(ngModel)]="searchName" (ngModelChange)="applyFilter()" placeholder="🔍 Search by item name..." class="search-input" />
+      <div class="date-filters">
+        <label>Expiry From</label>
+        <input type="date" [(ngModel)]="filterExpiryFrom" (ngModelChange)="applyFilter()" class="date-input" />
+        <label>Expiry To</label>
+        <input type="date" [(ngModel)]="filterExpiryTo" (ngModelChange)="applyFilter()" class="date-input" />
+        <button class="clear-btn" (click)="clearFilters()">✕ Clear</button>
       </div>
     </div>
 
@@ -127,9 +138,9 @@
             <p-tag [value]="item.quantity.toString()" [severity]="stockSeverity(item)" />
             <span *ngIf="isLowStock(item)" class="low-label">Low</span>
           </td>
-          <td>{{ item.costPrice | currency }}</td>
-          <td>{{ item.sellingPrice | currency }}</td>
-          <td><strong>{{ totalValue(item) | currency }}</strong></td>
+          <td>₹ {{ item.costPrice | number:'1.0-2' }}</td>
+          <td>₹ {{ item.sellingPrice | number:'1.0-2' }}</td>
+          <td><strong>₹ {{ totalValue(item) | number:'1.0-2' }}</strong></td>
           <td>
             {{ item.expiryDate | date:'mediumDate' }}
             <i *ngIf="isExpiringSoon(item)" class="pi pi-exclamation-circle expiry-warn" title="Expiring soon"></i>
@@ -163,11 +174,11 @@
     <div class="field-row">
       <div class="field">
         <label>Cost Price</label>
-        <p-inputnumber [(ngModel)]="newItem.costPrice" mode="currency" currency="USD" styleClass="w-full" />
+        <p-inputnumber [(ngModel)]="newItem.costPrice" prefix="₹ " styleClass="w-full" />
       </div>
       <div class="field">
         <label>Selling Price</label>
-        <p-inputnumber [(ngModel)]="newItem.sellingPrice" mode="currency" currency="USD" styleClass="w-full" />
+        <p-inputnumber [(ngModel)]="newItem.sellingPrice" prefix="₹ " styleClass="w-full" />
       </div>
     </div>
     <div class="field">

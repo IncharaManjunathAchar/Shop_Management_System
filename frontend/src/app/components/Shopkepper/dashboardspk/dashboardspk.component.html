@@ -1,0 +1,161 @@
+<div class="dash-page">
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <div class="header-left">
+      <span class="header-icon">📊</span>
+      <div>
+        <h2>Dashboard</h2>
+        <span>{{ shop ? shop.shopName : 'Loading...' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="stats-row">
+    <div class="stat-card teal">
+      <span class="stat-icon">📦</span>
+      <div>
+        <span class="stat-value">{{ totalItems }}</span>
+        <span class="stat-label">Total Items</span>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <span class="stat-icon">📊</span>
+      <div>
+        <span class="stat-value">{{ totalStock }}</span>
+        <span class="stat-label">Total Stock</span>
+      </div>
+    </div>
+    <div class="stat-card purple">
+      <span class="stat-icon">💰</span>
+      <div>
+        <span class="stat-value">₹ {{ inventoryValue | number:'1.0-0' }}</span>
+        <span class="stat-label">Inventory Value</span>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <span class="stat-icon">🛒</span>
+      <div>
+        <span class="stat-value">₹ {{ todaySales | number:'1.0-0' }}</span>
+        <span class="stat-label">Today's Sales</span>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <span class="stat-icon">📈</span>
+      <div>
+        <span class="stat-value" [class.negative]="netProfit < 0">₹ {{ netProfit | number:'1.0-0' }}</span>
+        <span class="stat-label">Net Profit</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alerts-section" *ngIf="lowStockItems.length > 0 || expiringItems.length > 0 || (subscriptionDaysLeft <= 7 && subscriptionDaysLeft > 0)">
+    <div class="alert-item warn" *ngIf="lowStockItems.length > 0" (click)="go('/shopkeeper/inventory')">
+      <span>⚠ <strong>{{ lowStockItems.length }}</strong> item(s) are low in stock (≤10 units)</span>
+      <span class="alert-action">View →</span>
+    </div>
+    <div class="alert-item warn" *ngIf="expiringItems.length > 0" (click)="go('/shopkeeper/inventory')">
+      <span>⚠ <strong>{{ expiringItems.length }}</strong> item(s) expiring within 7 days</span>
+      <span class="alert-action">View →</span>
+    </div>
+    <div class="alert-item danger" *ngIf="subscriptionDaysLeft <= 7 && subscriptionDaysLeft > 0" (click)="go('/shopkeeper/subscription')">
+      <span>🔴 Subscription expires in <strong>{{ subscriptionDaysLeft }}</strong> day(s)</span>
+      <span class="alert-action">Renew →</span>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-panel purchase-panel">
+      <div class="panel-header">
+        <span>📊</span>
+        <h3>Sales Trend — Last 7 Days</h3>
+      </div>
+      <div class="chart-wrap">
+        <canvas #salesChart></canvas>
+      </div>
+    </div>
+    <div class="chart-panel sale-panel">
+      <div class="panel-header">
+        <span>📈</span>
+        <h3>Profit Trend — Last 7 Days</h3>
+      </div>
+      <div class="chart-wrap">
+        <canvas #profitChart></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bottom-row">
+
+    <!-- Quick Actions -->
+    <div class="panel purchase-panel">
+      <div class="panel-header">
+        <span>⚡</span>
+        <h3>Quick Actions</h3>
+      </div>
+      <div class="action-list">
+        <div class="action-item" (click)="go('/shopkeeper/inventory')">
+          <span class="action-icon teal">🛍️</span>
+          <div>
+            <p class="action-title">Add Purchase</p>
+            <p class="action-desc">Record new stock purchase</p>
+          </div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="action-item" (click)="go('/shopkeeper/inventory')">
+          <span class="action-icon orange">💵</span>
+          <div>
+            <p class="action-title">Add Sale</p>
+            <p class="action-desc">Record a new sale</p>
+          </div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="action-item" (click)="go('/shopkeeper/inventory')">
+          <span class="action-icon blue">📦</span>
+          <div>
+            <p class="action-title">View Inventory</p>
+            <p class="action-desc">Manage your stock</p>
+          </div>
+          <span class="chevron">›</span>
+        </div>
+        <div class="action-item" (click)="go('/shopkeeper/subscription')">
+          <span class="action-icon purple">💳</span>
+          <div>
+            <p class="action-title">Subscription</p>
+            <p class="action-desc">View or renew your plan</p>
+          </div>
+          <span class="chevron">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="panel sale-panel">
+      <div class="panel-header">
+        <span>🕒</span>
+        <h3>Recent Activity</h3>
+      </div>
+      <p class="empty" *ngIf="recentActivity.length === 0">No transactions yet.</p>
+      <div class="activity-list" *ngIf="recentActivity.length > 0">
+        <div class="activity-item" *ngFor="let tx of recentActivity">
+          <span class="activity-badge" [class.sale]="tx.transactionType === 'Sale'" [class.purchase]="tx.transactionType === 'Purchase'">
+            {{ tx.transactionType === 'Sale' ? '💵' : '🛍️' }}
+          </span>
+          <div class="activity-info">
+            <p class="activity-title">{{ tx.transactionType }} — {{ tx.quantity }} unit(s)</p>
+            <p class="activity-date">{{ tx.transactionDate | date:'MMM d, h:mm a' }}</p>
+          </div>
+          <span class="activity-amount" [class.sale]="tx.transactionType === 'Sale'">
+            {{ tx.transactionType === 'Sale' ? '+' : '-' }}₹ {{ tx.totalAmount | number:'1.0-0' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

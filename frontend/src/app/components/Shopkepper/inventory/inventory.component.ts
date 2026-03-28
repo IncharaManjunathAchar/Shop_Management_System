@@ -37,11 +37,14 @@ export class InventoryComponent implements OnInit {
   items: any[] = [];
   filteredItems: any[] = [];
   filter = 'all';
+  searchName = '';
+  filterExpiryFrom = '';
+  filterExpiryTo = '';
   activeForm: 'purchase' | 'sale' = 'purchase';
   showAddDialog = false;
 
   purchaseForm = { itemId: null, quantity: null, costPrice: null };
-  saleForm = { itemId: null, quantity: null, sellingPrice: null };
+  saleForm = { itemId: null, quantity: null };
   newItem = { itemName: '', quantity: null, costPrice: null, sellingPrice: null, expiryDate: null };
 
   constructor(
@@ -85,7 +88,7 @@ export class InventoryComponent implements OnInit {
 
   loadItems() {
     this.api.getItems(this.shopId).subscribe({
-      next: data => { this.items = data; this.applyFilter(); },
+      next: data => { this.items = [...data]; this.applyFilter(); this.cdr.detectChanges(); },
       error: () => this.msg.add({ severity: 'error', summary: 'Error', detail: 'Failed to load items.' })
     });
   }
@@ -93,13 +96,34 @@ export class InventoryComponent implements OnInit {
   applyFilter() {
     const today = new Date();
     const soon = new Date(); soon.setDate(today.getDate() + 30);
+    let result = [...this.items];
+
     if (this.filter === 'low') {
-      this.filteredItems = this.items.filter(i => i.quantity <= 5);
+      result = result.filter(i => i.quantity <= 10);
     } else if (this.filter === 'expiring') {
-      this.filteredItems = this.items.filter(i => new Date(i.expiryDate) <= soon && new Date(i.expiryDate) >= today);
-    } else {
-      this.filteredItems = [...this.items];
+      result = result.filter(i => new Date(i.expiryDate) <= soon && new Date(i.expiryDate) >= today);
     }
+
+    if (this.searchName.trim()) {
+      result = result.filter(i => i.itemName?.toLowerCase().includes(this.searchName.toLowerCase()));
+    }
+
+    if (this.filterExpiryFrom) {
+      result = result.filter(i => i.expiryDate && new Date(i.expiryDate) >= new Date(this.filterExpiryFrom));
+    }
+
+    if (this.filterExpiryTo) {
+      result = result.filter(i => i.expiryDate && new Date(i.expiryDate) <= new Date(this.filterExpiryTo + 'T23:59:59'));
+    }
+
+    this.filteredItems = result;
+    this.cdr.detectChanges();
+  }
+
+  clearFilters() {
+    this.filter = 'all'; this.searchName = '';
+    this.filterExpiryFrom = ''; this.filterExpiryTo = '';
+    this.applyFilter();
   }
 
   setFilter(f: string) { this.filter = f; this.applyFilter(); }
@@ -116,12 +140,22 @@ export class InventoryComponent implements OnInit {
     });
   }
 
+  get selectedSaleItem(): any {
+    return this.items.find(i => i.itemId === this.saleForm.itemId) ?? null;
+  }
+
   onSale() {
-    const tx = { shopId: this.shopId, itemId: this.saleForm.itemId, transactionType: 'Sale', quantity: this.saleForm.quantity, unitPrice: this.saleForm.sellingPrice };
+    const item = this.selectedSaleItem;
+    if (!item) return;
+    if ((this.saleForm.quantity ?? 0) > item.quantity) {
+      this.msg.add({ severity: 'warn', summary: 'Insufficient Stock', detail: `Only ${item.quantity} unit(s) available for ${item.itemName}.` });
+      return;
+    }
+    const tx = { shopId: this.shopId, itemId: this.saleForm.itemId, transactionType: 'Sale', quantity: this.saleForm.quantity, unitPrice: item.sellingPrice };
     this.api.createTransaction(tx).subscribe({
       next: () => {
         this.msg.add({ severity: 'success', summary: 'Success', detail: 'Sale recorded successfully.' });
-        this.saleForm = { itemId: null, quantity: null, sellingPrice: null };
+        this.saleForm = { itemId: null, quantity: null };
         this.loadItems();
       },
       error: err => this.msg.add({ severity: 'error', summary: 'Error', detail: err.error || 'Sale failed.' })
@@ -148,14 +182,14 @@ export class InventoryComponent implements OnInit {
     });
   }
 
-  lowStockCount() { return this.items.filter(i => i.quantity <= 5).length; }
+  lowStockCount() { return this.items.filter(i => i.quantity <= 10).length; }
   expiringSoonCount() {
     const soon = new Date(); soon.setDate(soon.getDate() + 30);
     return this.items.filter(i => new Date(i.expiryDate) <= soon && new Date(i.expiryDate) >= new Date()).length;
   }
 
   totalValue(item: any) { return item.quantity * item.sellingPrice; }
-  isLowStock(item: any) { return item.quantity <= 5; }
+  isLowStock(item: any) { return item.quantity <= 10; }
   isExpiringSoon(item: any) {
     const soon = new Date(); soon.setDate(soon.getDate() + 30);
     return new Date(item.expiryDate) <= soon && new Date(item.expiryDate) >= new Date();
@@ -163,7 +197,7 @@ export class InventoryComponent implements OnInit {
 
   stockSeverity(item: any): 'success' | 'warn' | 'danger' {
     if (item.quantity === 0) return 'danger';
-    if (item.quantity <= 5) return 'warn';
+    if (item.quantity <= 10) return 'warn';
     return 'success';
   }
 }

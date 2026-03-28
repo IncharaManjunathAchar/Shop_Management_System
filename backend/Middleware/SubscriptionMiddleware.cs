@@ -15,7 +15,10 @@ public class SubscriptionMiddleware
     public async Task InvokeAsync(HttpContext context, AppDbContext db)
     {
         var path = context.Request.Path.Value?.ToLower() ?? "";
-        var isWhitelisted = path.Contains("/api/auth") || path.Contains("/api/subscriptions/users") && path.Contains("/subscribe");
+        var isWhitelisted =
+            path.Contains("/api/auth") ||
+            path.Contains("/api/subscriptions") ||
+            path.Contains("/swagger");
 
         if (!isWhitelisted && context.User.Identity?.IsAuthenticated == true && context.User.IsInRole("Shopkeeper"))
         {

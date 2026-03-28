@@ -1,21 +1,42 @@
-<h2>Subscription Approval</h2>
+<div class="approval-page">
 
-<table border="1">
-  <tr>
-    <th>ID</th>
-    <th>User</th>
-    <th>Plan</th>
-    <th>Status</th>
-    <th>Action</th>
-  </tr>
+  <div class="header-banner">
+    <span class="header-icon">📋</span>
+    <div>
+      <h2>Subscription Approvals</h2>
+      <span>Review and manage pending subscription requests</span>
+    </div>
+  </div>
 
-  <tr *ngFor="let sub of subscriptions">
-    <td>{{sub.subscriptionId}}</td>
-    <td>{{sub.userId}}</td>
-    <td>{{sub.planId}}</td>
-    <td>{{sub.paymentStatus}}</td>
-    <td>
-      <button (click)="approve(sub.subscriptionId)">Approve</button>
-    </td>
-  </tr>
-</table>
+  <div class="section">
+    <p class="empty" *ngIf="subscriptions.length === 0">No pending subscription requests.</p>
+    <table *ngIf="subscriptions.length > 0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Plan</th>
+          <th>Requested On</th>
+          <th>Expiry</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let sub of subscriptions">
+          <td>{{ sub.subscriptionId }}</td>
+          <td>{{ sub.username }}</td>
+          <td>{{ sub.planName }}</td>
+          <td>{{ sub.startDate | date:'mediumDate' }}</td>
+          <td>{{ sub.expiryDate | date:'mediumDate' }}</td>
+          <td><span class="badge status-pending">{{ sub.status }}</span></td>
+          <td class="actions">
+            <button class="btn-approve" (click)="approve(sub.subscriptionId)">Approve</button>
+            <button class="btn-reject" (click)="reject(sub.subscriptionId)">Reject</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopManagementAPI.Data;
 using ShopManagementAPI.Models;
+using ShopManagementAPI.Services;
 using System.Security.Claims;
 
 namespace ShopManagementAPI.Controllers;
@@ -16,12 +17,14 @@ public class ShopsController : ControllerBase
     private readonly AppDbContext _context;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IWebHostEnvironment _env;
+    private readonly EmailService _emailService;
 
-    public ShopsController(AppDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment env)
+    public ShopsController(AppDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment env, EmailService emailService)
     {
         _context = context;
         _userManager = userManager;
         _env = env;
+        _emailService = emailService;
     }
 
     [Authorize(Roles = "Shopkeeper")]
@@ -117,6 +120,21 @@ public class ShopsController : ControllerBase
 
         _context.Shops.Add(shop);
         await _context.SaveChangesAsync();
+
+        var user = await _userManager.FindByIdAsync(userId!);
+        if (user?.Email != null)
+        {
+            try
+            {
+                await _emailService.SendAsync(
+                    user.Email, user.UserName!,
+                    "New Shop Created",
+                    $"Dear {user.UserName},\n\nYour new shop '{shop.ShopName}' has been created successfully.\nAddress: {shop.ShopAddress}\n\nShop Management System"
+                );
+            }
+            catch { }
+        }
+
         return Ok(shop);
     }
 

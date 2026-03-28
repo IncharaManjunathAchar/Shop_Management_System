@@ -1,18 +1,92 @@
-<div class="container">
-  <h2>Register</h2>
+<div class="auth-page">
+  <div class="auth-card">
 
-  <input [(ngModel)]="username" placeholder="Username" />
-  <input [(ngModel)]="email" placeholder="Email" />
-  <input [(ngModel)]="password" type="password" placeholder="Password" />
+    <div class="auth-logo">
+      <img src="assests/Logo.png" alt="logo" />
+    </div>
 
-  <input [(ngModel)]="shopName" placeholder="Shop Name" />
-  <input [(ngModel)]="shopAddress" placeholder="Shop Address" />
-  <input [(ngModel)]="contactNumber" placeholder="Contact Number" />
+    <!-- Step 1: Registration Form -->
+    <ng-container *ngIf="step === 'form'">
+      <h2>Create Account</h2>
+      <p class="subtitle">Fill in your details to get started</p>
 
-  <button (click)="register()">Register</button>
+      <div class="msg error" *ngIf="errorMsg">🔴 {{ errorMsg }}</div>
 
-  <p>
-    Already have an account?
-    <a routerLink="/login">Login</a>
-  </p>
+      <div class="section-label">Account Info</div>
+      <div class="field">
+        <label>Username</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-user input-icon"></i>
+          <input [(ngModel)]="username" placeholder="Choose a username" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-envelope input-icon"></i>
+          <input [(ngModel)]="email" type="email" placeholder="Enter your email" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap pw-wrap">
+          <i class="fa-solid fa-lock input-icon"></i>
+          <input [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="Create a password" />
+          <span class="eye" (click)="showPassword = !showPassword">
+            <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+          </span>
+        </div>
+      </div>
+
+      <div class="section-label">Shop Info</div>
+      <div class="field">
+        <label>Shop Name</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-store input-icon"></i>
+          <input [(ngModel)]="shopName" placeholder="Enter shop name" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Shop Address</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-location-dot input-icon"></i>
+          <input [(ngModel)]="shopAddress" placeholder="Enter shop address" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Contact Number</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-phone input-icon"></i>
+          <input [(ngModel)]="contactNumber" placeholder="Enter contact number" />
+        </div>
+      </div>
+
+      <button class="btn-primary" (click)="register()" [disabled]="loading">
+        {{ loading ? 'Sending OTP...' : 'Register' }}
+      </button>
+      <p class="switch-link">Already have an account? <a routerLink="/login">Sign In</a></p>
+    </ng-container>
+
+    <!-- Step 2: OTP Verification -->
+    <ng-container *ngIf="step === 'otp'">
+      <h2>Verify Email</h2>
+      <p class="subtitle">We sent a 6-digit OTP to<br/><strong>{{ email }}</strong></p>
+
+      <div class="msg error" *ngIf="errorMsg">🔴 {{ errorMsg }}</div>
+
+      <div class="field">
+        <label>OTP Code</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-shield-halved input-icon"></i>
+          <input [(ngModel)]="otp" placeholder="Enter 6-digit OTP" maxlength="6" />
+        </div>
+      </div>
+
+      <button class="btn-primary" (click)="verifyOtp()" [disabled]="loading">
+        {{ loading ? 'Verifying...' : 'Verify & Complete Registration' }}
+      </button>
+      <button class="btn-back" (click)="step = 'form'; errorMsg = ''">← Back</button>
+    </ng-container>
+
+  </div>
 </div>

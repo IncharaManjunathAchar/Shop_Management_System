@@ -1,13 +1,40 @@
-<div class="container">
-  <h2>Login</h2>
+<div class="auth-page">
+  <div class="auth-card">
 
-  <input [(ngModel)]="username" placeholder="Username" />
-  <input [(ngModel)]="password" type="password" placeholder="Password" />
+    <div class="auth-logo">
+      <img src="assests/Logo.png" alt="logo" />
+    </div>
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to your account</p>
 
-  <button (click)="login()">Login</button>
+    <div class="msg error" *ngIf="errorMsg">🔴 {{ errorMsg }}</div>
 
-  <p>
-    Don't have an account?
-    <a routerLink="/register">Register</a>
-  </p>
+    <div class="field">
+      <label>Username</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-user input-icon"></i>
+        <input [(ngModel)]="username" placeholder="Enter your username" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <div class="input-wrap pw-wrap">
+        <i class="fa-solid fa-lock input-icon"></i>
+        <input [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'" placeholder="Enter your password" />
+        <span class="eye" (click)="showPassword = !showPassword">
+          <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+        </span>
+      </div>
+    </div>
+
+    <div class="forgot-link">
+      <a routerLink="/forgot-password">Forgot Password?</a>
+    </div>
+
+    <button class="btn-primary" (click)="login()">Sign In</button>
+
+    <p class="switch-link">Don't have an account? <a routerLink="/register">Register</a></p>
+
+  </div>
 </div>

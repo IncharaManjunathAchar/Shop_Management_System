@@ -23,7 +23,7 @@ public class EmailService
             return;
 
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress(emailConfig["FromName"], username));
+        message.From.Add(new MailboxAddress("no-reply", username));
         message.To.Add(new MailboxAddress(toName, toEmail));
         message.Subject = subject;
         message.Body = new TextPart("plain") { Text = body };

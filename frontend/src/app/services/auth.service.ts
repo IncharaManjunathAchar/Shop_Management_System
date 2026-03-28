@@ -22,12 +22,19 @@ export class AuthService {
 
   login(username: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.base}/login`, { username, password }).pipe(
-      tap(res => localStorage.setItem('token', res.token))
+      tap(res => {
+        localStorage.removeItem('shopLogoUrl');
+        localStorage.setItem('token', res.token);
+      })
     );
   }
 
   register(data: any): Observable<any> {
-    return this.http.post<any>(`${this.base}/register`, data).pipe(
+    return this.http.post<any>(`${this.base}/register`, data);
+  }
+
+  verifyEmail(email: string, otp: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/verify-email`, { email, otp }).pipe(
       tap(res => localStorage.setItem('token', res.token))
     );
   }
@@ -35,6 +42,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('shopId');
+    localStorage.removeItem('shopLogoUrl');
     this.router.navigate(['/login']);
   }
 
@@ -69,6 +77,14 @@ export class AuthService {
     if (!token) return '';
     const decoded = jwtDecode<JwtPayload>(token);
     return decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ?? decoded.unique_name ?? '';
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/forgot-password`, { email });
+  }
+
+  resetPassword(email: string, otp: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/reset-password`, { email, otp, newPassword });
   }
 
   getShopId(): number { return Number(localStorage.getItem('shopId') || 0); }

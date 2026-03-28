@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ShopManagementAPI.Data;
+using ShopManagementAPI.Services;
 using System.Security.Claims;
 
 namespace ShopManagementAPI.Controllers;
@@ -14,12 +15,14 @@ public class ProfileController : ControllerBase
     private readonly UserManager<IdentityUser> _userManager;
     private readonly AppDbContext _context;
     private readonly IWebHostEnvironment _env;
+    private readonly EmailService _emailService;
 
-    public ProfileController(UserManager<IdentityUser> userManager, AppDbContext context, IWebHostEnvironment env)
+    public ProfileController(UserManager<IdentityUser> userManager, AppDbContext context, IWebHostEnvironment env, EmailService emailService)
     {
         _userManager = userManager;
         _context = context;
         _env = env;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -112,6 +115,21 @@ public class ProfileController : ControllerBase
 
         subscription.Status = "Cancelled";
         await _context.SaveChangesAsync();
+
+        var user = await _userManager.FindByIdAsync(userId!);
+        if (user?.Email != null)
+        {
+            try
+            {
+                await _emailService.SendAsync(
+                    user.Email, user.UserName!,
+                    "Subscription Cancelled",
+                    $"Dear {user.UserName},\n\nYour subscription has been cancelled successfully.\nYou will lose access to features at the end of your current period.\n\nTo continue using the system, please subscribe to a new plan.\n\nShop Management System"
+                );
+            }
+            catch { }
+        }
+
         return Ok(new { message = "Subscription cancelled." });
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -36,6 +37,10 @@ public class AuthController : ControllerBase
         if (existing != null)
             return BadRequest("Username already exists");
 
+        var existingEmail = await _userManager.FindByEmailAsync(request.Email);
+        if (existingEmail != null)
+            return BadRequest("Email already registered");
+
         var user = new IdentityUser { UserName = request.Username, Email = request.Email };
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
@@ -53,16 +58,36 @@ public class AuthController : ControllerBase
         _context.Shops.Add(shop);
         await _context.SaveChangesAsync();
 
+        // Generate and send OTP for email verification
+        var otp = new Random().Next(100000, 999999).ToString();
+        await _userManager.RemoveAuthenticationTokenAsync(user, "OTP", "VerifyEmail");
+        await _userManager.SetAuthenticationTokenAsync(user, "OTP", "VerifyEmail", otp);
+
         try
         {
             await _emailService.SendAsync(
-                user.Email!,
-                user.UserName!,
-                "Welcome to Shop Management System",
-                $"Dear {user.UserName},\n\nYou have successfully registered.\nYour shop '{shop.ShopName}' has been created.\n\nPlease subscribe to a plan to start using the system.\n\nShop Management System"
+                user.Email!, user.UserName!,
+                "Verify Your Email - Shop Management System",
+                $"Dear {user.UserName},\n\nThank you for registering!\n\nYour email verification OTP is:\n\n{otp}\n\nPlease enter this OTP to complete your registration.\n\nShop Management System"
             );
         }
         catch { }
+
+        return Ok(new { message = "OTP sent to your email. Please verify to complete registration.", email = user.Email });
+    }
+
+    [HttpPost("verify-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto dto)
+    {
+        var user = await _userManager.FindByEmailAsync(dto.Email);
+        if (user == null) return BadRequest("User not found.");
+
+        var stored = await _userManager.GetAuthenticationTokenAsync(user, "OTP", "VerifyEmail");
+        if (stored == null) return BadRequest("OTP expired or not found.");
+        if (stored != dto.Otp) return BadRequest("Invalid OTP.");
+
+        await _userManager.RemoveAuthenticationTokenAsync(user, "OTP", "VerifyEmail");
 
         var roles = await _userManager.GetRolesAsync(user);
         var token = GenerateJwtToken(user, roles);
@@ -81,6 +106,66 @@ public class AuthController : ControllerBase
         var roles = await _userManager.GetRolesAsync(user);
         var token = GenerateJwtToken(user, roles);
         return Ok(new { token });
+    }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+    {
+        var user = await _userManager.FindByEmailAsync(dto.Email);
+        if (user == null)
+            return BadRequest("No account found with this email address.");
+
+        var otp = new Random().Next(100000, 999999).ToString();
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        await _userManager.RemoveAuthenticationTokenAsync(user, "OTP", "ResetOtp");
+        await _userManager.SetAuthenticationTokenAsync(user, "OTP", "ResetOtp", $"{otp}|{token}");
+
+        try
+        {
+            await _emailService.SendAsync(
+                user.Email!, user.UserName!,
+                "Password Reset OTP - Shop Management System",
+                $"Dear {user.UserName},\n\nYour OTP for password reset is:\n\n{otp}\n\nThis OTP is valid for 10 minutes. Do not share it with anyone.\n\nShop Management System"
+            );
+        }
+        catch { }
+
+        return Ok(new { message = "If that email exists, an OTP has been sent." });
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        var user = await _userManager.FindByEmailAsync(dto.Email);
+        if (user == null) return BadRequest("Invalid request.");
+
+        var stored = await _userManager.GetAuthenticationTokenAsync(user, "OTP", "ResetOtp");
+        if (stored == null) return BadRequest("OTP expired or not found.");
+
+        var parts = stored.Split('|', 2);
+        if (parts.Length != 2 || parts[0] != dto.Otp)
+            return BadRequest("Invalid OTP.");
+
+        var result = await _userManager.ResetPasswordAsync(user, parts[1], dto.NewPassword);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors.Select(e => e.Description).FirstOrDefault());
+
+        await _userManager.RemoveAuthenticationTokenAsync(user, "OTP", "ResetOtp");
+
+        try
+        {
+            await _emailService.SendAsync(
+                user.Email!, user.UserName!,
+                "Password Reset Successful",
+                $"Dear {user.UserName},\n\nYour password has been reset successfully.\nIf you did not do this, please contact support immediately.\n\nShop Management System"
+            );
+        }
+        catch { }
+
+        return Ok(new { message = "Password reset successful." });
     }
 
     private string GenerateJwtToken(IdentityUser user, IList<string> roles)
@@ -126,4 +211,22 @@ public class RegisterDto
     public required string ShopName { get; set; }
     public required string ShopAddress { get; set; }
     public required string ContactNumber { get; set; }
+}
+
+public class ForgotPasswordDto
+{
+    public required string Email { get; set; }
+}
+
+public class VerifyEmailDto
+{
+    public required string Email { get; set; }
+    public required string Otp { get; set; }
+}
+
+public class ResetPasswordDto
+{
+    public required string Email { get; set; }
+    public required string Otp { get; set; }
+    public required string NewPassword { get; set; }
 }

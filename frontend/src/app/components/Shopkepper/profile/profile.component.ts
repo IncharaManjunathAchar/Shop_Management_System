@@ -135,9 +135,7 @@ export class ProfileComponent implements OnInit {
     this.api.cancelSubscription().subscribe({
       next: () => {
         this.showCancelConfirm = false;
-        this.successMsg = 'Subscription cancelled.';
-        if (this.profile.subscription) this.profile.subscription.status = 'Cancelled';
-        this.cdr.detectChanges();
+        this.router.navigate(['/shopkeeper/subscription']);
       },
       error: err => { this.errorMsg = err?.error || 'Failed to cancel subscription.'; this.cdr.detectChanges(); }
     });

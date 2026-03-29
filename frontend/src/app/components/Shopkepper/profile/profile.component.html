@@ -96,7 +96,7 @@
       <div class="card">
         <div class="section-header">
           <h3>🏪 My Shops</h3>
-          <button class="btn-add-shop" (click)="showAddShop = true">+ Add Shop</button>
+          <button class="btn-add-shop" *ngIf="profile.subscription?.status === 'Approved'" (click)="showAddShop = true">+ Add Shop</button>
         </div>
         <p class="plan-hint" *ngIf="profile.subscription">
           {{ profile.subscription.planName }} plan · {{ shops.length }} / {{ profile.subscription.planName === 'Yearly' ? 7 : profile.subscription.planName === 'Monthly' ? 5 : 1 }} shops used

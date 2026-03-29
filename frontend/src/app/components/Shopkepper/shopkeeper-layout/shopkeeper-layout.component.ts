@@ -14,12 +14,12 @@ import { ApiService } from '../../../services/api.service';
 export class ShopkeeperLayoutComponent implements OnInit {
 
   logoUrl: string | null = null;
+  hasActiveSubscription = false;
   private readonly BASE = 'http://localhost:5244';
 
   constructor(private auth: AuthService, private api: ApiService, private cdr: ChangeDetectorRef, public router: Router) {}
 
   ngOnInit() {
-    // Show cached logo instantly, then refresh from API
     const cached = localStorage.getItem('shopLogoUrl');
     if (cached) { this.logoUrl = cached; this.cdr.detectChanges(); }
 
@@ -31,6 +31,15 @@ export class ShopkeeperLayoutComponent implements OnInit {
         else localStorage.removeItem('shopLogoUrl');
         this.cdr.detectChanges();
       }
+    });
+
+    const userId = this.auth.getUserId();
+    this.api.getActiveSubscription(userId).subscribe({
+      next: (res: any) => {
+        this.hasActiveSubscription = res?.isActive === true;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.hasActiveSubscription = false; this.cdr.detectChanges(); }
     });
   }
 

@@ -31,7 +31,7 @@ export const routes: Routes = [
       { path: 'dashboard',    component: DashboardspkComponent,    canActivate: [subscriptionGuard] },
       { path: 'inventory',    component: InventoryComponent,        canActivate: [subscriptionGuard] },
       { path: 'transactions', component: TransactionsComponent,     canActivate: [subscriptionGuard] },
-      { path: 'profile',       component: ProfileComponent,          canActivate: [subscriptionGuard] },
+      { path: 'profile',       component: ProfileComponent },
     ]
   },
 

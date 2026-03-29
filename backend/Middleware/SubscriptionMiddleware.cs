@@ -18,6 +18,7 @@ public class SubscriptionMiddleware
         var isWhitelisted =
             path.Contains("/api/auth") ||
             path.Contains("/api/subscriptions") ||
+            path.Contains("/api/profile") ||
             path.Contains("/swagger");
 
         if (!isWhitelisted && context.User.Identity?.IsAuthenticated == true && context.User.IsInRole("Shopkeeper"))

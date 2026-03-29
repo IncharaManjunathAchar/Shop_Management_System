@@ -5,9 +5,11 @@
       Shop Manager
     </div>
     <div class="nav-links">
-      <a routerLink="/shopkeeper/dashboard"     routerLinkActive="active">📊 Dashboard</a>
-      <a routerLink="/shopkeeper/inventory"     routerLinkActive="active">📦 Inventory</a>
-      <a routerLink="/shopkeeper/transactions"  routerLinkActive="active">🧾 Transactions</a>
+      <ng-container *ngIf="hasActiveSubscription">
+        <a routerLink="/shopkeeper/dashboard"     routerLinkActive="active">📊 Dashboard</a>
+        <a routerLink="/shopkeeper/inventory"     routerLinkActive="active">📦 Inventory</a>
+        <a routerLink="/shopkeeper/transactions"  routerLinkActive="active">🧾 Transactions</a>
+      </ng-container>
       <a routerLink="/shopkeeper/subscription"  routerLinkActive="active">💳 Subscription</a>
     </div>
     <div class="nav-user">
